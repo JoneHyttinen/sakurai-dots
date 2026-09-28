@@ -1,0 +1,7 @@
+-- Directly inject keys into the hl.plugin data table using string literals
+--hl.plugin["csgo-vulkan-fix"] = {
+--	res_w = 1280,
+--	res_h = 960,
+--	fix_mouse = true,
+--	class = "Counter Strike 2",
+--}
