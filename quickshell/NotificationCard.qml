@@ -2,11 +2,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
+import Quickshell.Wayland
 
 MouseArea {
     id: card
     required property var notification
     readonly property bool critical: notification.urgency === NotificationUrgency.Critical
+    property color background: Theme.colors.surfaceContainer
+    property bool inHistory: false
+    property string timeText: ""
+    signal activated()
 
     function iconSource(s) {
         if (!s) return "";
@@ -14,11 +19,21 @@ MouseArea {
         if (s.includes("://")) return s;
         return Quickshell.iconPath(s);
     }
+
     function actionList() {
-        const out = [];
-        const a = notification.actions;
-        for (let i = 0; i < a.length; i++) out.push(a[i]);
-        return out;
+        return Array.from(notification?.actions ?? []);
+    }
+
+    // Bring the sending app's window to the front, matched by its
+    // desktop entry or app name against the window's app id
+    function focusApp() {
+        const keys = [notification.desktopEntry, notification.appName]
+            .filter(k => k).map(k => k.toLowerCase());
+        const w = ToplevelManager.toplevels.values.find(t => {
+            const app = (t.appId ?? "").toLowerCase();
+            return app !== "" && keys.some(k => app.includes(k) || k.includes(app));
+        });
+        w?.activate();
     }
 
     readonly property string imageSource: iconSource(notification.image) || iconSource(notification.appIcon)
@@ -33,14 +48,16 @@ MouseArea {
     onExited: Notifs.hold(notification, false)
     onClicked: {
         const def = actionList().find(a => a.identifier === "default");
-        if (def) def.invoke();
+        if (def) def.invoke();   // tells Discord to open the message
+        focusApp();              // makes sure its window actually comes forward
         Notifs.removePopup(notification);
+        card.activated();
     }
 
     Rectangle {
         anchors.fill: parent
         radius: Theme.radius
-        color: Theme.colors.surfaceContainer
+        color: card.background
         border.width: 1
         border.color: card.critical ? Theme.colors.primary : Theme.colors.outlineVariant
     }
@@ -85,11 +102,11 @@ MouseArea {
 
                 Text {
                     anchors { left: parent.left; right: closeBtn.left; rightMargin: 8; verticalCenter: parent.verticalCenter }
-                    text: card.notification.appName
+                    text: card.notification.appName + (card.timeText ? "  ·  " + card.timeText : "")
                     elide: Text.ElideRight
                     color: Theme.colors.subtext
                     font.family: Theme.font
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fontSize.tiny
                 }
                 MouseArea {
                     id: closeBtn
@@ -98,7 +115,13 @@ MouseArea {
                     height: 18
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: card.notification.dismiss()
+                    onClicked: {
+                      if (card.inHistory)
+                          card.notification.dismiss();          // remove from history
+                      else
+                          Notifs.removePopup(card.notification); // just hide the popup
+
+                    }
                     Icon {
                         anchors.centerIn: parent
                         name: "close"
@@ -114,7 +137,7 @@ MouseArea {
                 elide: Text.ElideRight
                 color: Theme.colors.text
                 font.family: Theme.font
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontSize.body
                 font.weight: Font.Medium
             }
 
@@ -128,7 +151,7 @@ MouseArea {
                 elide: Text.ElideRight
                 color: Theme.colors.subtext
                 font.family: Theme.font
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontSize.small
             }
 
             // Extra action buttons, e.g. "Reply" or "Mark as read"
@@ -161,7 +184,7 @@ MouseArea {
                             text: actionBtn.modelData.text
                             color: actionBtn.containsMouse ? Theme.colors.primaryText : Theme.colors.text
                             font.family: Theme.font
-                            font.pixelSize: 12
+                            font.pixelSize: Theme.fontSize.small
                         }
                     }
                 }

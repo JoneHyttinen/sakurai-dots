@@ -36,7 +36,7 @@ MouseArea {
             text: Math.round(root.volume * 100) + "%"
             color: Theme.colors.subtext
             font.family: Theme.font
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize.small
             font.weight: Font.Medium
         }
     }
@@ -51,7 +51,7 @@ MouseArea {
             text: "Output"
             color: Theme.colors.subtext
             font.family: Theme.font
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize.small
             font.weight: Font.Medium
         }
 
@@ -84,7 +84,7 @@ MouseArea {
                 text: Math.round(root.volume * 100) + "%"
                 color: Theme.colors.text
                 font.family: Theme.font
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontSize.small
             }
         }
 
@@ -94,7 +94,7 @@ MouseArea {
             text: "Devices"
             color: Theme.colors.subtext
             font.family: Theme.font
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize.small
             font.weight: Font.Medium
         }
 

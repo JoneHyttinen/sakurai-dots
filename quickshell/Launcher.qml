@@ -127,7 +127,7 @@ PanelWindow {
                     selectionColor: Theme.colors.primary
                     selectedTextColor: Theme.colors.primaryText
                     font.family: Theme.font
-                    font.pixelSize: 15
+                    font.pixelSize: Theme.fontSize.large
                     clip: true
 
                     onTextChanged: {
@@ -214,7 +214,7 @@ PanelWindow {
                             elide: Text.ElideRight
                             color: row.current ? Theme.colors.primary : Theme.colors.text
                             font.family: Theme.font
-                            font.pixelSize: 14
+                            font.pixelSize: Theme.fontSize.medium
                             font.weight: Font.Medium
                         }
                         Text {
@@ -225,7 +225,7 @@ PanelWindow {
                             elide: Text.ElideRight
                             color: Theme.colors.subtext
                             font.family: Theme.font
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontSize.tiny
                         }
                     }
                 }
@@ -240,7 +240,7 @@ PanelWindow {
                 text: "No results"
                 color: Theme.colors.subtext
                 font.family: Theme.font
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontSize.body
             }
         }
     }

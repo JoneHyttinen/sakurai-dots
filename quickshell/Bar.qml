@@ -3,7 +3,9 @@ import Quickshell
 import Quickshell.Hyprland
 
 PanelWindow {
+    id: bar
     required property var modelData
+    property var sidebar: null
     screen: modelData
 
     anchors { top: true; left: true; right: true }
@@ -53,7 +55,7 @@ PanelWindow {
             text: Qt.formatDateTime(clock.date, "ddd d MMM   HH:mm")
             color: Theme.colors.text
             font.family: Theme.font
-            font.pixelSize: 13
+            font.pixelSize: Theme.fontSize.body
             font.weight: Font.Medium
         }
 
@@ -64,6 +66,20 @@ PanelWindow {
             spacing: 14
 
             Tray { anchors.verticalCenter: parent.verticalCenter }
+            NotifButton { anchors.verticalCenter: parent.verticalCenter }
+            MouseArea {
+                anchors.verticalCenter: parent.verticalCenter
+                width: sbIcon.implicitWidth
+                height: sbIcon.implicitHeight
+                cursorShape: Qt.PointingHandCursor
+                onClicked: bar.sidebar?.toggle(bar.screen, bar)
+
+                Icon {
+                    id: sbIcon
+                    name: "tune"
+                    color: bar.sidebar?.shown ? Theme.colors.primary : Theme.colors.text
+                }
+            }
             Volume { anchors.verticalCenter: parent.verticalCenter }
             Network { anchors.verticalCenter: parent.verticalCenter }
         }

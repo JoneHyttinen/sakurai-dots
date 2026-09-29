@@ -10,6 +10,7 @@ PopupWindow {
     default property alias content: body.data
 
     function toggle() { visible = !visible }
+    function close() { visible = false }
 
     anchor.item: anchorItem
     anchor.rect.width: anchorItem.width
@@ -37,8 +38,13 @@ PopupWindow {
     }
 
     onVisibleChanged: {
-        if (visible) grabDelay.restart();
-        else grab.active = false;
+      if (visible) {
+        Panels.opened(popup);
+        grabDelay.restart();
+      } else {
+        grab.active = false;
+        Panels.closed(popup);
+      }
     }
 
     Rectangle {

@@ -85,17 +85,17 @@ end, { repeating = true })
 -- Swap current workspace with another workspace.
 
 -- Swap all windows between the current workspace and the target workspace
-hl.bind(mainMod .. " + CONTROL + SHIFT + 1", hl.dsp.exec_cmd("~/.config/hypr/swap-workspaces.sh 1"))
+hl.bind(mainMod .. " + CONTROL + SHIFT + 1", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 1"))
 
-hl.bind(mainMod .. " + CONTROL + SHIFT + 2", hl.dsp.exec_cmd("~/.config/hypr/swap-workspaces.sh 2"))
+hl.bind(mainMod .. " + CONTROL + SHIFT + 2", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 2"))
 
-hl.bind(mainMod .. " + CONTROL + SHIFT + 3", hl.dsp.exec_cmd("~/.config/hypr/swap-workspaces.sh 3"))
+hl.bind(mainMod .. " + CONTROL + SHIFT + 3", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 3"))
 
-hl.bind(mainMod .. " + CONTROL + SHIFT + 4", hl.dsp.exec_cmd("~/.config/hypr/swap-workspaces.sh 4"))
+hl.bind(mainMod .. " + CONTROL + SHIFT + 4", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 4"))
 
-hl.bind(mainMod .. " + CONTROL + SHIFT + 5", hl.dsp.exec_cmd("~/.config/hypr/swap-workspaces.sh 5"))
+hl.bind(mainMod .. " + CONTROL + SHIFT + 5", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 5"))
 
-hl.bind(mainMod .. " + CONTROL + SHIFT + 6", hl.dsp.exec_cmd("~/.config/hypr/swap-workspaces.sh 6"))
+hl.bind(mainMod .. " + CONTROL + SHIFT + 6", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 6"))
 
 ---- LAUNCHER ----
 ------------------
@@ -156,6 +156,9 @@ hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(noctCall .. "panel-toggle clipboard")
 
 -- Notifications
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(noctCall .. "panel-toggle control-center notifications"))
+
+-- Sidebar
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs ipc call sidebar toggle"))
 
 -------------------------------
 ---- WORKSPACES & MONITORS ----

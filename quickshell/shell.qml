@@ -2,14 +2,15 @@ import Quickshell
 
 ShellRoot {
     Launcher { id: appLauncher }
+    Sidebar { id: appSidebar }
+    NotificationPopups {}
 
     Variants {
         model: Quickshell.screens
-        Bar {}
+        Bar { sidebar: appSidebar }
     }
     Variants {
         model: Quickshell.screens
         Dock { launcher: appLauncher }
     }
-    NotificationPopups {}
 }

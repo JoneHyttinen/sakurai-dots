@@ -2,7 +2,7 @@
 
 hl.config({
 	input = {
-		sensitivity = -0.30,
+		sensitivity = -0.5,
 		accel_profile = "flat",
 		kb_layout = "fi",
 	},

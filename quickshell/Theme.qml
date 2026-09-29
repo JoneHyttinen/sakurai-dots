@@ -6,10 +6,10 @@ import Quickshell.Io
 Singleton {
     property alias colors: palette
     readonly property int radius: 12
-    readonly property string font: "Satoshi"
+    readonly property string font: "Geist"
 
     // Change this one number to scale all UI text
-    readonly property real fontScale: 1.5
+    readonly property real fontScale: 1.25
 
     readonly property QtObject fontSize: QtObject {
         readonly property int tiny:   Math.round(11 * root.fontScale)

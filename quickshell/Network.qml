@@ -36,7 +36,7 @@ MouseArea {
             text: "Connections"
             color: Theme.colors.subtext
             font.family: Theme.font
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize.small
             font.weight: Font.Medium
         }
 
