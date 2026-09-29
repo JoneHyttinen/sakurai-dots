@@ -6,7 +6,7 @@ import Quickshell.Io
 Singleton {
     property alias colors: palette
     readonly property int radius: 12
-    readonly property string font: "Inter"
+    readonly property string font: "Satoshi"
 
     FileView {
         path: Quickshell.env("HOME") + "/.cache/matugen/quickshell.json"

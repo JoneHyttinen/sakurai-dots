@@ -9,4 +9,5 @@ ShellRoot {
         model: Quickshell.screens
         Dock {}
     }
+    Launcher {}
 }
