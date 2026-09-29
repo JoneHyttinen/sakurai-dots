@@ -127,6 +127,7 @@ PanelWindow {
                         Repeater {
                             model: [
                                 { icon: "bedtime",            label: "Suspend",   confirm: false, cmd: ["systemctl", "suspend"] },
+                                { icon: "lock", label: "Lock", confirm: false, cmd: ["loginctl", "lock-session"] },
                                 { icon: "logout", label: "Log out", confirm: true, cmd: ["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"] },
                                 { icon: "restart_alt",        label: "Reboot",    confirm: true,  cmd: ["systemctl", "reboot"] },
                                 { icon: "power_settings_new", label: "Shut down", confirm: true,  cmd: ["systemctl", "poweroff"] },
@@ -194,6 +195,13 @@ PanelWindow {
                         label: "Night light"
                         active: Panels.nightLight
                         onClicked: Panels.nightLight = !Panels.nightLight
+                    }
+                    ToggleTile {
+                      width: toggles.tileWidth
+                      icon: "coffee"
+                      label: "Keep awake"
+                      active: Panels.keepAwake
+                      onClicked: Panels.keepAwake = !Panels.keepAwake
                     }
                     ToggleTile {
                         readonly property bool muted: root.sink?.audio?.muted ?? true

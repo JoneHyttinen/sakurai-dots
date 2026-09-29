@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 
 PanelWindow {
     id: bar
@@ -84,4 +85,8 @@ PanelWindow {
             Network { anchors.verticalCenter: parent.verticalCenter }
         }
     }
+  IdleInhibitor {
+    window: bar
+    enabled: Panels.keepAwake
+  }
 }

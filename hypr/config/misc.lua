@@ -15,6 +15,7 @@ hl.config({
 		swallow_regex = "(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)",
 		vrr = 3,
 		focus_on_activate = true,
+		allow_session_lock_restore = true,
 	},
 	render = {
 		direct_scanout = 2,

@@ -9,6 +9,7 @@ Singleton {
     // The popup or sidebar currently open; opening another closes it
     property var current: null
     property bool nightLight: false
+    property bool keepAwake: false
 
     function opened(p) {
         if (current && current !== p) current.close();
