@@ -43,9 +43,9 @@ PanelWindow {
         return extra.includes(q) ? 20 : 0;
     }
 
-    function open() {
+    function open(target) {
         const mon = Hyprland.focusedMonitor;
-        screen = Quickshell.screens.find(s => s.name === mon?.name) ?? Quickshell.screens[0];
+        screen = target ?? Quickshell.screens.find(s => s.name === mon?.name) ?? Quickshell.screens[0];
         search.text = "";
         selected = 0;
         visible = true;
@@ -53,7 +53,7 @@ PanelWindow {
         openAnim.restart();
     }
     function close() { visible = false }
-    function toggle() { visible ? close() : open() }
+    function toggle(target) { visible ? close() : open(target) }
     function launch(app) {
         if (!app) return;
         close();

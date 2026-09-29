@@ -23,6 +23,8 @@ PanelWindow {
         "discord",
     ]
 
+    property var launcher: null
+
     anchors { bottom: true; left: true; right: true }
     implicitHeight: 100
     color: "transparent"
@@ -49,6 +51,41 @@ PanelWindow {
             id: row
             anchors.centerIn: parent
             spacing: 8
+
+            MouseArea {
+                id: launcherButton
+                visible: root.launcher !== null
+                width: 48
+                height: 48
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.launcher.toggle(root.screen)
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 14
+                    color: Theme.colors.surfaceContainerHigh
+                    opacity: launcherButton.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                }
+
+                Icon {
+                    anchors.centerIn: parent
+                    name: "apps"
+                    font.pixelSize: 28
+                    color: Theme.colors.primary
+                    scale: launcherButton.pressed ? 0.9 : (launcherButton.containsMouse ? 1.08 : 1)
+                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                }
+            }
+
+            Rectangle {
+                visible: root.launcher !== null
+                anchors.verticalCenter: parent.verticalCenter
+                width: 1
+                height: 32
+                color: Theme.colors.outlineVariant
+            }
 
             Repeater {
                 model: root.pinned
