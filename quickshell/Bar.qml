@@ -56,5 +56,16 @@ PanelWindow {
             font.pixelSize: 13
             font.weight: Font.Medium
         }
+
+        Row {
+            anchors.right: parent.right
+            anchors.rightMargin: 14
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 14
+
+            Tray { anchors.verticalCenter: parent.verticalCenter }
+            Volume { anchors.verticalCenter: parent.verticalCenter }
+            Network { anchors.verticalCenter: parent.verticalCenter }
+        }
     }
 }
