@@ -7,14 +7,14 @@ PanelWindow {
     screen: modelData
 
     anchors { top: true; left: true; right: true }
-    implicitHeight: 42
+    implicitHeight: 44
     color: "transparent"
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
     Rectangle {
         anchors.fill: parent
-        anchors { topMargin: 6; leftMargin: 8; rightMargin: 8 }
+        anchors { topMargin: 8; leftMargin: 8; rightMargin: 8 }
         radius: Theme.radius
         color: Theme.colors.surfaceContainer
 

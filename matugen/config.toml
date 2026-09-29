@@ -5,5 +5,5 @@ input_path = '~/.config/matugen/templates/quickshell.json'
 output_path = '~/.cache/matugen/quickshell.json'
 
 [templates.hyprland]
-input_path = '~/.config/matugen/templates/hyprland.conf'
-output_path = '~/.config/hypr/colors.conf'
+input_path = '~/.config/matugen/templates/hyprland.lua'
+output_path = '~/.config/hypr/config/matugen.lua'
