@@ -11,4 +11,5 @@ ShellRoot {
         model: Quickshell.screens
         Dock { launcher: appLauncher }
     }
+    NotificationPopups {}
 }
