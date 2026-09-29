@@ -1,0 +1,8 @@
+# Ignore everything in ~/.config...
+/*
+
+# ...except the configs I manage on purpose
+!/.gitignore
+!/hypr/
+!/quickshell/
+!/matugen/
