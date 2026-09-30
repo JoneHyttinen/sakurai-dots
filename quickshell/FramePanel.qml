@@ -70,4 +70,10 @@ Canvas {
     onHeightChanged: requestPaint()
     onEdgeChanged: requestPaint()
     onFillChanged: requestPaint()  // wallpaper color changes
+
+    // Redraw when first created, when the canvas becomes usable again
+    // (e.g. after its window was hidden), and when shown
+    Component.onCompleted: requestPaint()
+    onAvailableChanged: if (available) requestPaint()
+    onVisibleChanged: if (visible) requestPaint()
 }

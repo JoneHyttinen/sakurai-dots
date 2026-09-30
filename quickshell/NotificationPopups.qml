@@ -6,60 +6,57 @@ PanelWindow {
     id: root
     screen: Quickshell.screens.find(s => s.name === "DP-1") ?? Quickshell.screens[0]
 
-    // Stay visible briefly after the last card leaves, so it can animate out
-    readonly property bool hasItems: Notifs.popups.length > 0
-    visible: hasItems || hideDelay.running
-    onHasItemsChanged: if (!hasItems) hideDelay.restart()
-    Timer { id: hideDelay; interval: 260 }
-
-    // Tucked into the corner below the bar and inside the right band
-    anchors { top: true; right: true }
+    // A fixed, always-mapped window over the right side; only the panel
+    // inside it changes size, and only the panel takes clicks
+    anchors { top: true; right: true; bottom: true }
     exclusiveZone: 0
     implicitWidth: 360 + 24 + Theme.frame.radius
-    implicitHeight: list.contentHeight + 24 + Theme.frame.radius
-    Behavior on implicitHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
     color: "transparent"
+    mask: Region { item: panel.visible ? panel : null }
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "qs-notifications"
 
-    FramePanel {
-        anchors.fill: parent
-        edge: "topRight"
-    }
+    readonly property bool hasItems: Notifs.popups.length > 0
 
-    ScriptModel {
-        id: popupModel
-        values: Notifs.popups.map(p => p.n)
-    }
+    Item {
+        id: panel
+        width: parent.width
+        // Fits the cards exactly; shrinks to nothing when there are none
+        height: root.hasItems ? stack.implicitHeight + 24 + Theme.frame.radius : 0
+        visible: height > Theme.frame.radius + Theme.radius
+        Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
-    ListView {
-        id: list
-        x: Theme.frame.radius + 12
-        y: 12
-        width: 360
-        height: contentHeight
-        spacing: 8
-        interactive: false
-        model: popupModel
-
-        delegate: NotificationCard {
-            required property var modelData
-            notification: modelData
+        FramePanel {
+            anchors.fill: parent
+            edge: "topRight"
         }
 
-        // New cards slide in from under the right edge of the frame
-        add: Transition {
-            NumberAnimation { property: "x"; from: 380; to: 0; duration: 280; easing.type: Easing.OutCubic }
-            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
-        }
-        // Dismissed or expired cards slide back out
-        remove: Transition {
-            NumberAnimation { property: "x"; to: 380; duration: 220; easing.type: Easing.InCubic }
-            NumberAnimation { property: "opacity"; to: 0; duration: 200 }
-        }
-        // Remaining cards move smoothly into place
-        displaced: Transition {
-            NumberAnimation { property: "y"; duration: 220; easing.type: Easing.OutCubic }
+        Column {
+            id: stack
+            x: Theme.frame.radius + 12
+            y: 12
+            width: 360
+            spacing: 8
+
+            // New cards slide in from under the right edge of the frame
+            add: Transition {
+                NumberAnimation { property: "x"; from: 380; duration: 280; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+            }
+            // Cards below move smoothly to make room, or to close a gap
+            move: Transition {
+                NumberAnimation { property: "y"; duration: 220; easing.type: Easing.OutCubic }
+            }
+
+            Repeater {
+                model: ScriptModel {
+                    values: Notifs.popups.map(p => p.n)
+                }
+                delegate: NotificationCard {
+                    required property var modelData
+                    notification: modelData
+                }
+            }
         }
     }
 }

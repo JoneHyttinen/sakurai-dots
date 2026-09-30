@@ -76,15 +76,20 @@ MouseArea {
                 anchors.fill: parent
                 radius: 10
                 color: "transparent"
-                visible: card.imageSource !== ""
-                IconImage {
-                    anchors.fill: parent
-                    source: card.imageSource
+                visible: avatar.status === Image.Ready
+
+                Image {
+                  id: avatar
+                  anchors.fill: parent
+                  source: card.imageSource
+                  sourceSize: Qt.size(80, 80)
+                  fillMode: Image.PreserveAspectCrop
+                  asynchronous: true
                 }
             }
             Icon {
                 anchors.centerIn: parent
-                visible: card.imageSource === ""
+                visible: avatar.status !== Image.Ready
                 name: "notifications"
                 font.pixelSize: 26
                 color: Theme.colors.primary
