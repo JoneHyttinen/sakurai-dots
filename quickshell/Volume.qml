@@ -117,7 +117,7 @@ MouseArea {
             icon: "tune"
             label: "Sound settings"
             onClicked: {
-                popup.visible = false;
+                popup.close();
                 Quickshell.execDetached(["pavucontrol"]);
             }
         }

@@ -11,7 +11,7 @@ MouseArea {
     cursorShape: Qt.PointingHandCursor
     onClicked: {
         popup.toggle();
-        if (popup.visible) {
+        if (popup.shown) {
             Notifs.unread = 0;
             Notifs.now = Date.now();
         }
@@ -120,7 +120,7 @@ MouseArea {
                         width: list.width
                         background: Theme.colors.surfaceContainerHigh
                         timeText: Notifs.ago(modelData)
-                        onActivated: popup.visible = false
+                        onActivated: popup.close()
                     }
                 }
             }

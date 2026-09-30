@@ -63,7 +63,7 @@ MouseArea {
             icon: "settings"
             label: "Network settings"
             onClicked: {
-                popup.visible = false;
+                popup.close();
                 Quickshell.execDetached(["nm-connection-editor"]);
             }
         }

@@ -62,7 +62,7 @@ MouseArea {
 
     Icon {
         id: chevron
-        name: popup.visible ? "expand_less" : "expand_more"
+        name: popup.shown ? "expand_less" : "expand_more"
     }
 
     // Reads the entries of whichever menu level is currently shown
@@ -104,7 +104,7 @@ MouseArea {
                     }
                     onDoubleClicked: mouse => {
                         if (mouse.button !== Qt.LeftButton) return;
-                        popup.visible = false;
+                        popup.close();
                         root.openApp(modelData);
                     }
 
@@ -174,7 +174,7 @@ MouseArea {
                                 root.menuStack = root.menuStack.concat([entry.modelData]);
                             } else {
                                 entry.modelData.triggered();
-                                popup.visible = false;
+                                popup.close();
                             }
                         }
                     }
