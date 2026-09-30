@@ -7,7 +7,6 @@ local launchPrefix = "uwsm app -- " -- if you are not using UWSM, make this empt
 ---------------------------
 
 -- Window manipulation
-hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("hyprctl kill"))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + ALT + T", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + D", hl.dsp.window.fullscreen({ mode = 1 }))

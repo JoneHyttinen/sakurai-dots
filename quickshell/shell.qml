@@ -6,6 +6,11 @@ ShellRoot {
     NotificationPopups {}
 
     Variants {
+      model: Quickshell.screens
+      Frame {}
+    }
+
+    Variants {
         model: Quickshell.screens
         Bar { sidebar: appSidebar }
     }

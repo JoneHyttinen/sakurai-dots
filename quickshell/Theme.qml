@@ -5,8 +5,13 @@ import Quickshell.Io
 
 Singleton {
     property alias colors: palette
-    readonly property int radius: 12
     readonly property string font: "Geist"
+
+    readonly property QtObject frame: QtObject {
+        readonly property int top: 40     // the bar's height; the top band of the frame
+        readonly property int side: 8     // left, right and bottom bands
+        readonly property int radius: 20  // inner corners of the frame
+    }
 
     // Change this one number to scale all UI text
     readonly property real fontScale: 1.25
