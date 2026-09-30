@@ -5,6 +5,7 @@ import Quickshell.Io
 
 Singleton {
     property alias colors: palette
+    readonly property int radius: 12
     readonly property string font: "Geist"
 
     readonly property QtObject frame: QtObject {

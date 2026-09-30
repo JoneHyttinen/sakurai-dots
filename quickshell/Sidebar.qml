@@ -17,7 +17,7 @@ PanelWindow {
 
     anchors { top: true; bottom: true; right: true }
     exclusiveZone: 0   // the bar's reserved space keeps us below it
-    implicitWidth: 380
+    implicitWidth: 380 + Theme.frame.radius
     color: "transparent"
     WlrLayershell.namespace: "qs-sidebar"
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
@@ -61,24 +61,29 @@ PanelWindow {
         onTriggered: grab.active = root.shown
     }
 
-    Rectangle {
+    Item {
         id: panel
-        y: 8
-        width: parent.width - 8
-        height: parent.height - 16
-        x: root.shown ? 0 : root.width + 20
+        width: parent.width
+        height: parent.height
+        x: root.shown ? 0 : root.width
         Behavior on x { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
-
-        radius: 16
-        color: Theme.colors.surface
-        border.width: 1
-        border.color: Theme.colors.outlineVariant
 
         focus: true
         Keys.onEscapePressed: root.close()
 
+        FramePanel {
+            anchors.fill: parent
+            edge: "right"
+        }
+
         Flickable {
-            anchors { fill: parent; margins: 12 }
+            anchors {
+                fill: parent
+                leftMargin: Theme.frame.radius + 12
+                rightMargin: 12
+                topMargin: 12
+                bottomMargin: 12
+            }
             contentHeight: col.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds

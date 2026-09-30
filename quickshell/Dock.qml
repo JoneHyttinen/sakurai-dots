@@ -28,25 +28,26 @@ PanelWindow {
     anchors { bottom: true; left: true; right: true }
     implicitHeight: 100
     color: "transparent"
-    exclusionMode: ExclusionMode.Ignore  // don't push windows up
+    exclusionMode: ExclusionMode.Normal 
+    exclusiveZone: 0  // sit above the frame's bottom band, without reserving space
     WlrLayershell.namespace: "qs-dock"
     mask: Region { item: dock }          // only the dock itself takes clicks
 
-    Rectangle {
+    Item {
         id: dock
         anchors.horizontalCenter: parent.horizontalCenter
-        width: row.implicitWidth + 20
+        width: row.implicitWidth + 20 + Theme.frame.radius * 2
         height: 64
-        radius: 18
-        color: Theme.colors.surfaceContainer
-        border.width: 1
-        border.color: Theme.colors.outlineVariant
 
-        y: root.shown ? parent.height - height - 12 : parent.height + 10
-        opacity: root.shown ? 1 : 0
+        // Flush against the frame when shown; slides down into it when hidden
+        y: root.shown ? parent.height - height : parent.height
         Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 220 } }
 
+        FramePanel {
+            anchors.fill: parent
+            edge: "bottom"
+        }
+        
         Row {
             id: row
             anchors.centerIn: parent

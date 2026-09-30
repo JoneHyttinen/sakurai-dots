@@ -57,40 +57,9 @@ PopupWindow {
         }
     }
 
-    // Flat top, concave corners where it meets the frame, rounded bottom
-    Canvas {
-        id: bg
-        anchors.fill: parent
-        antialiasing: true
-
-        onPaint: {
-            const ctx = getContext("2d");
-            const w = width, h = height;
-            const r = popup.fillet, c = popup.corner;
-
-            ctx.reset();
-            ctx.fillStyle = Theme.colors.surface;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(w, 0);
-            ctx.arc(w, r, r, -Math.PI / 2, Math.PI, true);            // concave top-right
-            ctx.lineTo(w - r, h - c);
-            ctx.arc(w - r - c, h - c, c, 0, Math.PI / 2, false);      // rounded bottom-right
-            ctx.lineTo(r + c, h);
-            ctx.arc(r + c, h - c, c, Math.PI / 2, Math.PI, false);    // rounded bottom-left
-            ctx.lineTo(r, r);
-            ctx.arc(0, r, r, 0, -Math.PI / 2, true);                  // concave top-left
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        // Redraw when the popup resizes or the wallpaper colors change
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-        Connections {
-            target: Theme.colors
-            function onSurfaceChanged() { bg.requestPaint() }
-        }
+    FramePanel {
+      anchors.fill: parent
+      edge: "top"
     }
 
     Column {
