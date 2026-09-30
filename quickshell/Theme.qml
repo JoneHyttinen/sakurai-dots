@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 
 Singleton {
+    id: root
     property alias colors: palette
     readonly property int radius: 12
     readonly property string font: "Geist"
@@ -41,6 +42,7 @@ Singleton {
             property string subtext: "#c4c6d0"
             property string primary: "#aac7ff"
             property string primaryText: "#0a305f"
+            property string secondary: "#bec6dc"
             property string outline: "#8e9099"
             property string outlineVariant: "#44474e"
         }

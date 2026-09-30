@@ -7,6 +7,7 @@
   "subtext": "{{colors.on_surface_variant.default.hex}}",
   "primary": "{{colors.primary.default.hex}}",
   "primaryText": "{{colors.on_primary.default.hex}}",
+  "secondary": "{{colors.secondary.default.hex}}",
   "outline": "{{colors.outline.default.hex}}",
   "outlineVariant": "{{colors.outline_variant.default.hex}}"
 }
