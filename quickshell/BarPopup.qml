@@ -12,14 +12,28 @@ PopupWindow {
     readonly property int fillet: Theme.frame.radius  // concave corners where it meets the frame
     readonly property int corner: Theme.radius         // rounded bottom corners
 
+    // Open/closed state; the window stays visible until the slide-out finishes
+    property bool shown: false
+    visible: shown || slide.y > -slide.height
+
     // Horizontal centre of the icon, in bar coordinates; worked out when opening
     property real anchorX: 0
 
     function toggle() {
-        if (!visible) anchorX = anchorItem.mapToItem(null, anchorItem.width / 2, 0).x;
-        visible = !visible;
+        if (!shown) anchorX = anchorItem.mapToItem(null, anchorItem.width / 2, 0).x;
+        shown = !shown;
     }
-    function close() { visible = false }
+    function close() { shown = false }
+
+    onShownChanged: {
+        if (shown) {
+            Panels.opened(popup);
+            grabDelay.restart();
+        } else {
+            grab.active = false;
+            Panels.closed(popup);
+        }
+    }
 
     // Hang from the bar's bottom edge, centred under the icon
     anchor.window: barWindow
@@ -33,42 +47,42 @@ PopupWindow {
     implicitWidth: contentWidth + fillet * 2
     implicitHeight: body.implicitHeight + 24
     color: "transparent"
-    visible: false
 
     // Close when clicking outside. The bar is included so clicking the
     // same icon again toggles the popup instead of closing and reopening it.
     HyprlandFocusGrab {
         id: grab
         windows: popup.barWindow ? [popup, popup.barWindow] : [popup]
-        onCleared: popup.visible = false
+        onCleared: popup.close()
     }
     Timer {
         id: grabDelay
         interval: 50
-        onTriggered: grab.active = popup.visible
-    }
-    onVisibleChanged: {
-        if (visible) {
-            Panels.opened(popup);
-            grabDelay.restart();
-        } else {
-            grab.active = false;
-            Panels.closed(popup);
-        }
+        onTriggered: grab.active = popup.shown
     }
 
-    FramePanel {
-      anchors.fill: parent
-      edge: "top"
-    }
+    // Everything slides together; the window's top edge is the frame's
+    // edge, so the popup looks like it comes out of the frame
+    Item {
+        id: slide
+        width: parent.width
+        height: parent.height
+        y: popup.shown ? 0 : -height
+        Behavior on y { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
 
-    Column {
-        id: body
-        anchors {
-            left: parent.left; leftMargin: popup.fillet + 12
-            right: parent.right; rightMargin: popup.fillet + 12
-            top: parent.top; topMargin: 12
+        FramePanel {
+            anchors.fill: parent
+            edge: "top"
         }
-        spacing: 10
+
+        Column {
+            id: body
+            anchors {
+                left: parent.left; leftMargin: popup.fillet + 12
+                right: parent.right; rightMargin: popup.fillet + 12
+                top: parent.top; topMargin: 12
+            }
+            spacing: 10
+        }
     }
 }
