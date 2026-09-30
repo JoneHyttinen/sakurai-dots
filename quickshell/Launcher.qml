@@ -18,30 +18,110 @@ PanelWindow {
     property string query: ""
     property int selected: 0
 
+    // ── Launch counts, saved between sessions ───────────────
+
+    FileView {
+        path: Quickshell.env("HOME") + "/.local/state/quickshell/launcher-usage.json"
+        onAdapterUpdated: writeAdapter()
+        onLoadFailed: error => {
+            if (error === FileViewError.FileNotFound) writeAdapter();
+        }
+
+        JsonAdapter {
+            id: usage
+            property var counts: ({})  // desktop entry id -> number of launches
+        }
+    }
+
+    function uses(app) { return usage.counts[app.id] ?? 0 }
+
+    function recordLaunch(app) {
+        // Assign a new object so the change is noticed and saved
+        const c = Object.assign({}, usage.counts);
+        c[app.id] = (c[app.id] ?? 0) + 1;
+        usage.counts = c;
+    }
+
+    // ── Apps and ranking ────────────────────────────────────
+
     readonly property var apps: DesktopEntries.applications.values
         .filter(a => !a.noDisplay)
         .sort((a, b) => a.name.localeCompare(b.name))
 
-    readonly property var results: {
-        const q = query.trim().toLowerCase();
-        if (q === "") return apps;
-        return apps
-            .map(a => ({ app: a, score: score(a, q) }))
-            .filter(r => r.score > 0)
-            .sort((x, y) => y.score - x.score)
-            .map(r => r.app);
-    }
+    // Most used first, then alphabetical
+    readonly property var appsByUsage: apps.slice().sort((a, b) => uses(b) - uses(a))
 
-    // Simple ranking: exact name > name prefix > word prefix > substring > description/keywords
+    // Name match quality, plus a small bonus for apps you launch often
     function score(app, q) {
         const name = app.name.toLowerCase();
-        if (name === q) return 100;
-        if (name.startsWith(q)) return 80;
-        if (name.split(/\s+/).some(w => w.startsWith(q))) return 60;
-        if (name.includes(q)) return 40;
-        const extra = [app.genericName, app.comment, String(app.keywords ?? "")].join(" ").toLowerCase();
-        return extra.includes(q) ? 20 : 0;
+        let s = 0;
+        if (name === q) s = 100;
+        else if (name.startsWith(q)) s = 80;
+        else if (name.split(/\s+/).some(w => w.startsWith(q))) s = 60;
+        else if (name.includes(q)) s = 40;
+        else {
+            const extra = [app.genericName, app.comment, String(app.keywords ?? "")].join(" ").toLowerCase();
+            s = extra.includes(q) ? 20 : 0;
+        }
+        return s > 0 ? s + Math.min(15, uses(app)) : 0;
     }
+
+    // ── Calculator ──────────────────────────────────────────
+
+    // Returns a number for simple math like "2+2" or "2^10", otherwise null
+    function calculate(text) {
+        if (!/^[\d\s+\-*/().,%^]+$/.test(text)) return null;  // only digits and operators
+        if (!/\d/.test(text) || !/[+\-*/%^]/.test(text)) return null;
+        try {
+            const expr = text.replace(/,/g, ".").replace(/\^/g, "**");
+            const value = Function("return (" + expr + ")")();
+            return Number.isFinite(value) ? Number(value.toPrecision(12)) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // ── Results: a mix of calculator, command and app rows ──
+
+    readonly property var results: {
+        const raw = query.trim();
+
+        if (raw.startsWith(">")) {
+            const cmd = raw.slice(1).trim();
+            return cmd !== "" ? [{ kind: "cmd", cmd: cmd }] : [];
+        }
+
+        const out = [];
+        const value = calculate(raw);
+        if (value !== null) out.push({ kind: "calc", value: value });
+
+        const q = raw.toLowerCase();
+        const matched = q === "" ? appsByUsage : apps
+            .map(a => ({ app: a, s: score(a, q) }))
+            .filter(r => r.s > 0)
+            .sort((x, y) => y.s - x.s)
+            .map(r => r.app);
+
+        return out.concat(matched.map(a => ({ kind: "app", app: a })));
+    }
+
+    function launch(r, inTerminal) {
+        if (!r) return;
+        close();
+        if (r.kind === "app") {
+            recordLaunch(r.app);
+            r.app.execute();
+        } else if (r.kind === "calc") {
+            Quickshell.execDetached(["wl-copy", String(r.value)]);
+        } else if (r.kind === "cmd") {
+            if (inTerminal)
+                Quickshell.execDetached(["alacritty", "-e", "sh", "-c", r.cmd + "; exec $SHELL"]);
+            else
+                Quickshell.execDetached(["sh", "-c", r.cmd]);
+        }
+    }
+
+    // ── Opening and closing ─────────────────────────────────
 
     function open(target) {
         const mon = Hyprland.focusedMonitor;
@@ -54,11 +134,6 @@ PanelWindow {
     }
     function close() { visible = false }
     function toggle(target) { visible ? close() : open(target) }
-    function launch(app) {
-        if (!app) return;
-        close();
-        app.execute();
-    }
 
     // Lets Hyprland open it: qs ipc call launcher toggle
     IpcHandler {
@@ -112,7 +187,7 @@ PanelWindow {
                 Icon {
                     id: searchIcon
                     anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
-                    name: "search"
+                    name: root.query.trim().startsWith(">") ? "terminal" : "search"
                     color: Theme.colors.subtext
                 }
 
@@ -145,7 +220,7 @@ PanelWindow {
                         } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) {
                             root.selected = Math.max(root.selected - 1, 0);
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            root.launch(root.results[root.selected]);
+                            root.launch(root.results[root.selected], event.modifiers & Qt.ShiftModifier);
                         } else {
                             return;
                         }
@@ -154,7 +229,7 @@ PanelWindow {
 
                     Text {
                         visible: search.text === ""
-                        text: "Search apps…"
+                        text: "Search apps  ·  2+2  ·  > command"
                         color: Theme.colors.subtext
                         font: search.font
                     }
@@ -184,6 +259,16 @@ PanelWindow {
                     required property var modelData
                     required property int index
                     readonly property bool current: ListView.isCurrentItem
+                    readonly property bool isApp: modelData.kind === "app"
+
+                    readonly property string title: isApp ? modelData.app.name
+                        : modelData.kind === "calc" ? "= " + modelData.value
+                        : modelData.cmd
+                    readonly property string subtitle: isApp
+                        ? (modelData.app.genericName || modelData.app.comment || "")
+                        : modelData.kind === "calc" ? "Enter to copy"
+                        : "Run command  ·  Shift+Enter to run in a terminal"
+
                     width: ListView.view.width
                     height: 48
                     hoverEnabled: true
@@ -191,18 +276,32 @@ PanelWindow {
                     // positionChanged rather than entered, so the selection doesn't
                     // jump when results move under a stationary mouse while typing
                     onPositionChanged: root.selected = index
-                    onClicked: root.launch(modelData)
+                    onClicked: mouse => root.launch(modelData, mouse.modifiers & Qt.ShiftModifier)
 
-                    IconImage {
-                        id: appIcon
+                    // App icon, or a symbol for calculator/command rows
+                    Item {
+                        id: iconBox
                         anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
-                        implicitSize: 32
-                        source: Quickshell.iconPath(row.modelData.icon)
+                        width: 32
+                        height: 32
+
+                        IconImage {
+                            visible: row.isApp
+                            anchors.fill: parent
+                            source: row.isApp ? Quickshell.iconPath(row.modelData.app.icon) : ""
+                        }
+                        Icon {
+                            visible: !row.isApp
+                            anchors.centerIn: parent
+                            name: row.modelData.kind === "calc" ? "calculate" : "terminal"
+                            font.pixelSize: 26
+                            color: Theme.colors.primary
+                        }
                     }
 
                     Column {
                         anchors {
-                            left: appIcon.right; leftMargin: 12
+                            left: iconBox.right; leftMargin: 12
                             right: parent.right; rightMargin: 10
                             verticalCenter: parent.verticalCenter
                         }
@@ -210,7 +309,7 @@ PanelWindow {
 
                         Text {
                             width: parent.width
-                            text: row.modelData.name
+                            text: row.title
                             elide: Text.ElideRight
                             color: row.current ? Theme.colors.primary : Theme.colors.text
                             font.family: Theme.font
@@ -219,9 +318,8 @@ PanelWindow {
                         }
                         Text {
                             width: parent.width
-                            readonly property string desc: row.modelData.genericName || row.modelData.comment || ""
-                            visible: desc !== ""
-                            text: desc
+                            visible: text !== ""
+                            text: row.subtitle
                             elide: Text.ElideRight
                             color: Theme.colors.subtext
                             font.family: Theme.font
@@ -237,7 +335,7 @@ PanelWindow {
                 horizontalAlignment: Text.AlignHCenter
                 topPadding: 8
                 bottomPadding: 8
-                text: "No results"
+                text: root.query.trim().startsWith(">") ? "Type a command to run" : "No results"
                 color: Theme.colors.subtext
                 font.family: Theme.font
                 font.pixelSize: Theme.fontSize.body
