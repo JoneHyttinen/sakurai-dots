@@ -81,7 +81,9 @@ hl.bind(mainMod .. " + code:86", function()
 	zoomfunction(0.3)
 end, { repeating = true })
 
--- Swap current workspace with another workspace.
+-- Show the dock on populated workspace
+
+hl.bind(mainMod .. " + ALT + D", hl.dsp.exec_cmd("qs ipc call dock toggle"))
 
 -- Swap all windows between the current workspace and the target workspace
 hl.bind(mainMod .. " + CONTROL + SHIFT + 1", hl.dsp.exec_cmd("~/.config/hypr/scripts/swap-workspaces.sh 1"))

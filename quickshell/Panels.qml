@@ -10,6 +10,7 @@ Singleton {
     property var current: null
     property bool nightLight: false
     property bool keepAwake: false
+    property bool dockForced: false
 
     function opened(p) {
         if (current && current !== p) current.close();
