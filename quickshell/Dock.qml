@@ -19,7 +19,7 @@ PanelWindow {
 
     // Desktop entry IDs: the .desktop file name without the extension
     readonly property var pinned: [
-        "firefox-developer-edition",
+        "firefox-devedition",
         "Alacritty",
         "org.kde.dolphin",
         "steam",
@@ -30,7 +30,7 @@ PanelWindow {
     // Themed tile icons: a Material Symbol name, or "svg" for icons/<id>.svg.
     // Apps not listed here keep their normal icon.
     readonly property var tileIcons: ({
-        "firefox-developer-edition": "svg",
+        "firefox-devedition": "svg",
         "Alacritty": "terminal",
         "org.kde.dolphin": "folder",
         "steam": "svg",

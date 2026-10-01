@@ -14,3 +14,13 @@ require("config.windowrules")
 require("config.workspaces")
 require("config.plugins")
 require("config.matugen")
+
+local f = io.open("/etc/hostname")
+local host = f and f:read("*l") or ""
+if f then
+	f:close()
+end
+
+if host == "elitebook" then
+	require("config.laptop")
+end

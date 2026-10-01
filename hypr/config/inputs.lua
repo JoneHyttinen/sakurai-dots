@@ -2,7 +2,7 @@
 
 hl.config({
 	input = {
-		sensitivity = -0.5,
+		sensitivity = 0.2,
 		accel_profile = "flat",
 		kb_layout = "fi",
 	},
@@ -13,11 +13,6 @@ hl.config({
 		--	persistent_warps = true,
 	},
 })
-
-hl.gesture({ fingers = 4, direction = "horizontal", action = "workspace" })
-hl.gesture({ fingers = 3, direction = "down", action = "close" })
-hl.gesture({ fingers = 3, direction = "up", action = "fullscreen" })
-hl.gesture({ fingers = 3, direction = "left", action = "float" })
 
 local cursor_hidden = false
 local real_cursor_theme = "Bibata-Modern-Classic" -- your normal theme
