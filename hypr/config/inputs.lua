@@ -14,11 +14,6 @@ hl.config({
 	},
 })
 
-hl.gesture({ fingers = 4, direction = "horizontal", action = "workspace" })
-hl.gesture({ fingers = 3, direction = "down", action = "close" })
-hl.gesture({ fingers = 3, direction = "up", action = "fullscreen" })
-hl.gesture({ fingers = 3, direction = "left", action = "float" })
-
 local cursor_hidden = false
 local real_cursor_theme = "Bibata-Modern-Classic" -- your normal theme
 local cursor_size = 24

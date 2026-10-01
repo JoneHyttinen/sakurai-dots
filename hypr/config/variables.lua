@@ -2,7 +2,7 @@
 
 TERMINAL = "alacritty"
 FILE_MANAGER = "dolphin"
-BROWSER = "firefox-developer-edition"
+BROWSER = "firefox-devedition"
 EDITOR = "nvim"
 CALCULATOR = "gnome-calculator"
 
