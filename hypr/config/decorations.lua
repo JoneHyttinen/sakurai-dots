@@ -3,8 +3,8 @@
 
 hl.config({
 	general = {
-		gaps_in = 4, -- 4 per side = 8px between windows, matching gaps_out
-		gaps_out = 8,
+		gaps_in = 6,
+		gaps_out = 10,
 		border_size = 2,
 		extend_border_grab_area = 10,
 		resize_on_border = true,
