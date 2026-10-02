@@ -11,8 +11,6 @@
 !/qt6ct/
 
 hypr/config/matugen.lua
-hypr/config/inputs.lua
-hypr/config/variables.lua
 hypr/hyprlock-colors.conf
 alacritty/matugen.toml
 nvim/lua/matugen_palette.lua
