@@ -1,9 +1,9 @@
 import QtQuick
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Widgets
-import Qt5Compat.GraphicalEffects
 
 PanelWindow {
     id: root
@@ -13,19 +13,12 @@ PanelWindow {
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(modelData)
     readonly property var workspace: monitor?.activeWorkspace ?? null
     readonly property bool emptyWorkspace: workspace !== null && workspace.toplevels.values.length === 0
-    // SUPER + ALT + D shows it on the focused monitor, over windows
+    // SUPER + D shows it on the focused monitor, over windows
     readonly property bool forced: Panels.dockForced && Hyprland.focusedMonitor?.name === modelData.name
     readonly property bool shown: emptyWorkspace || forced
 
-    // Desktop entry IDs: the .desktop file name without the extension
-    readonly property var pinned: [
-        "firefox-developer-edition",
-        "Alacritty",
-        "org.kde.dolphin",
-        "steam",
-        "spotify",
-        "discord",
-    ]
+    // Pinned apps, saved to disk (see DockPins.qml)
+    readonly property var pinned: DockPins.ids
 
     // Themed tile icons: a Material Symbol name, or "svg" for icons/<id>.svg.
     // Apps not listed here keep their normal icon.
@@ -42,15 +35,16 @@ PanelWindow {
     property var launcher: null
 
     anchors { bottom: true; left: true; right: true }
-    implicitHeight: 300  // room above the dock for tooltips
+    implicitHeight: 300  // room above the dock for tooltips, previews and the menu
     color: "transparent"
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: 0  // sit above the frame's bottom band, without reserving space
     WlrLayershell.namespace: "qs-dock"
-    mask: Region { 
-      item: dock
-      Region { item: previews.visible ? previews : null }
-    }  // only the dock itself takes clicks
+    mask: Region {
+        item: dock
+        Region { item: previews.visible ? previews : null }
+        Region { item: menu.visible ? menu : null }
+    }
 
     // ── Matching windows to apps ─────────────────────────────
 
@@ -88,8 +82,10 @@ PanelWindow {
         return out;
     }
 
-    property var hovered: null
-    property var previewFor: null
+    // ── Hover previews ───────────────────────────────────────
+
+    property var hovered: null      // dock icon under the mouse
+    property var previewFor: null   // dock icon whose window previews are showing
 
     // Short delay, so the mouse can travel from the icon into the previews
     Timer {
@@ -97,7 +93,212 @@ PanelWindow {
         interval: 250
         onTriggered: if (!root.hovered && !previewHover.hovered) root.previewFor = null
     }
-    function schedulePreviewHide() { previewHide.restart(); }
+
+    // ── Right-click menu ─────────────────────────────────────
+
+    property var menuFor: null  // dock icon whose right-click menu is open
+
+    function openMenu(it) {
+        previewFor = null;
+        menuFor = it;
+        menuGrabDelay.restart();
+    }
+    function closeMenu() {
+        menuFor = null;
+        menuGrab.active = false;
+    }
+    onShownChanged: if (!shown) closeMenu()
+
+    // Close the menu when clicking anywhere else
+    HyprlandFocusGrab {
+        id: menuGrab
+        windows: [root]
+        onCleared: root.closeMenu()
+    }
+    Timer {
+        id: menuGrabDelay
+        interval: 50
+        onTriggered: menuGrab.active = root.menuFor !== null
+    }
+
+    // Menu entries for a dock icon; { separator: true } draws a divider
+    function menuItems(it) {
+        const out = [];
+        const e = it.entry;
+
+        if (e) {
+            for (const a of Array.from(e.actions ?? []))
+                out.push({ icon: "arrow_outward", label: a.name, run: () => a.execute() });
+            out.push({ icon: "add", label: "New window", run: () => e.execute() });
+        }
+
+        if (it.windows.length >= 2) {
+            out.push({ separator: true });
+            for (const w of it.windows)
+                out.push({ icon: "select_window", label: w.title || "Window", run: () => w.activate() });
+        }
+
+        if (it.windows.length > 0 || e) out.push({ separator: true });
+
+        if (it.windows.length > 0) {
+            out.push({
+                icon: "close",
+                label: it.windows.length > 1 ? "Close all windows" : "Close window",
+                run: () => it.windows.forEach(w => w.close()),
+            });
+        }
+        if (e) {
+            const isPinned = DockPins.isPinned(e.id);
+            out.push({
+                icon: isPinned ? "keep_off" : "keep",
+                label: isPinned ? "Unpin" : "Pin to dock",
+                run: () => DockPins.toggle(e.id),
+            });
+        }
+        return out;
+    }
+
+    // ── One dock icon ────────────────────────────────────────
+
+    component DockItem: MouseArea {
+        id: item
+        property var entry: null
+        property var windows: []
+        property string fallbackIcon: ""   // app id, for apps without a desktop entry
+        property int cycle: 0
+        readonly property string label: entry?.name ?? fallbackIcon
+        readonly property string tileIcon: root.tileIcons[entry?.id ?? ""] ?? ""
+        readonly property bool running: windows.length > 0
+
+        width: 48
+        height: 48
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+        cursorShape: Qt.PointingHandCursor
+
+        onContainsMouseChanged: {
+            if (containsMouse) {
+                root.hovered = item;
+                root.previewFor = (windows.length >= 2 && root.menuFor === null) ? item : null;
+            } else {
+                if (root.hovered === item) root.hovered = null;
+                previewHide.restart();
+            }
+        }
+
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton) {
+                root.openMenu(item);
+                return;
+            }
+            Panels.dockForced = false;
+            root.previewFor = null;
+            // Middle-click, or nothing running: start the app
+            if (mouse.button === Qt.MiddleButton || windows.length === 0) {
+                entry?.execute();
+                return;
+            }
+            // Otherwise focus its windows, cycling on repeated clicks
+            windows[cycle % windows.length].activate();
+            cycle++;
+        }
+
+        // Hover background
+        Rectangle {
+            anchors.fill: parent
+            radius: 14
+            color: Theme.colors.surfaceContainerHigh
+            opacity: item.containsMouse ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+        }
+
+        // Themed tile
+        Rectangle {
+            id: tile
+            visible: item.tileIcon !== ""
+            anchors.centerIn: parent
+            width: 40
+            height: 40
+            radius: 12
+            color: item.running ? Theme.colors.primary : Theme.colors.surfaceContainerHigh
+            scale: item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
+            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+            readonly property color glyphColor: item.running ? Theme.colors.primaryText : Theme.colors.text
+
+            // Material Symbol glyph
+            Icon {
+                visible: item.tileIcon !== "svg"
+                anchors.centerIn: parent
+                name: item.tileIcon
+                font.pixelSize: 38
+                color: tile.glyphColor
+            }
+
+            // SVG glyph, recolored to the theme; keeps the file's own anti-aliasing
+            Image {
+                visible: item.tileIcon === "svg"
+                anchors.centerIn: parent
+                width: 32
+                height: 32
+                sourceSize: Qt.size(128, 128)
+                source: item.tileIcon === "svg" ? Qt.resolvedUrl("icons/" + item.entry.id + ".svg") : ""
+                smooth: true
+                mipmap: true
+
+                layer.enabled: true
+                layer.effect: ColorOverlay { color: tile.glyphColor }
+            }
+        }
+
+        // Apps without a tile icon keep their normal icon
+        IconImage {
+            visible: item.tileIcon === ""
+            anchors.centerIn: parent
+            implicitSize: 36
+            source: Quickshell.iconPath(item.entry?.icon || item.fallbackIcon)
+            scale: item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+        }
+
+        // Running indicator: one dot per window, up to three
+        Row {
+            anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: -4 }
+            spacing: 3
+
+            Repeater {
+                model: Math.min(item.windows.length, 3)
+                delegate: Rectangle {
+                    width: 4
+                    height: 4
+                    radius: 2
+                    color: Theme.colors.primary
+                }
+            }
+        }
+
+        // Tooltip with the app's name (not while previews or the menu are showing)
+        Rectangle {
+            visible: item.containsMouse && item.label !== "" && root.previewFor !== item && root.menuFor !== item
+            anchors { bottom: parent.top; bottomMargin: 14; horizontalCenter: parent.horizontalCenter }
+            width: tip.implicitWidth + 16
+            height: 24
+            radius: 8
+            color: Theme.colors.surface
+            border.width: 1
+            border.color: Theme.colors.outlineVariant
+
+            Text {
+                id: tip
+                anchors.centerIn: parent
+                text: item.label
+                color: Theme.colors.text
+                font.family: Theme.font
+                font.pixelSize: Theme.fontSize.small
+            }
+        }
+    }
 
     // ── The dock ─────────────────────────────────────────────
 
@@ -162,7 +363,6 @@ PanelWindow {
                 model: root.pinnedEntries
                 delegate: DockItem {
                     required property var modelData
-                    dock: root
                     anchors.verticalCenter: parent.verticalCenter
                     entry: modelData
                     windows: root.windowsFor(modelData)
@@ -182,7 +382,6 @@ PanelWindow {
                 model: root.running
                 delegate: DockItem {
                     required property var modelData
-                    dock: root
                     anchors.verticalCenter: parent.verticalCenter
                     entry: modelData.entry
                     fallbackIcon: modelData.appId
@@ -191,7 +390,7 @@ PanelWindow {
             }
         }
     }
-    
+
     // ── Window previews ──────────────────────────────────────
 
     Rectangle {
@@ -266,6 +465,86 @@ PanelWindow {
                         color: Theme.colors.text
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize.small
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Right-click menu ─────────────────────────────────────
+
+    Rectangle {
+        id: menu
+        readonly property var target: root.menuFor
+        readonly property var items: target ? root.menuItems(target) : []
+        // Never taller than the space above the dock
+        readonly property real maxHeight: dock.y - 20
+
+        visible: target !== null && root.shown
+        width: 250
+        height: Math.min(menuCol.implicitHeight + 16, maxHeight)
+        radius: Theme.radius
+        color: Theme.colors.surface
+        border.width: 1
+        border.color: Theme.colors.outlineVariant
+
+        // Centred above the icon, kept on screen
+        x: target ? Math.max(8, Math.min(root.width - width - 8,
+                target.mapToItem(null, target.width / 2, 0).x - width / 2)) : 0
+        y: dock.y - height - 10
+
+        // Scrolls when the menu has more entries than fit
+        Flickable {
+            anchors { fill: parent; margins: 8 }
+            contentHeight: menuCol.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            Column {
+                id: menuCol
+                width: parent.width
+                spacing: 2
+
+                Text {
+                    width: parent.width
+                    leftPadding: 10
+                    topPadding: 4
+                    bottomPadding: 4
+                    text: menu.target?.label ?? ""
+                    elide: Text.ElideRight
+                    color: Theme.colors.subtext
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize.small
+                    font.weight: Font.Medium
+                }
+
+                Repeater {
+                    model: menu.items
+                    delegate: Item {
+                        id: entry
+                        required property var modelData
+                        width: menuCol.width
+                        height: modelData.separator ? 9 : 36
+
+                        Rectangle {
+                            visible: entry.modelData.separator === true
+                            anchors.centerIn: parent
+                            width: parent.width - 16
+                            height: 1
+                            color: Theme.colors.outlineVariant
+                        }
+
+                        MenuRow {
+                            visible: entry.modelData.separator !== true
+                            anchors.fill: parent
+                            icon: entry.modelData.icon ?? ""
+                            label: entry.modelData.label ?? ""
+                            onClicked: {
+                                entry.modelData.run();
+                                root.closeMenu();
+                                Panels.dockForced = false;
+                            }
+                        }
                     }
                 }
             }
