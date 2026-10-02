@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Services.UPower
 
 MouseArea {
@@ -7,6 +8,34 @@ MouseArea {
     readonly property var dev: UPower.displayDevice
     readonly property bool charging: dev.state === UPowerDeviceState.Charging
     readonly property int pct: Math.round(dev.percentage * 100)
+    readonly property bool onBattery: dev.state === UPowerDeviceState.Discharging
+
+    // Warn once each at 20%, 10% and 5%; reset when the charger is plugged in
+    property int lastWarned: 101
+
+    onPctChanged: {
+        if (!onBattery) return;
+        for (const level of [5, 10, 20]) {
+            if (pct <= level && lastWarned > level) {
+                lastWarned = level;
+                Quickshell.execDetached(["notify-send",
+                    "-u", level <= 10 ? "critical" : "normal",
+                    "-a", "Battery", "-i", "battery-caution",
+                    "Battery low", pct + "% remaining"]);
+                break;
+            }
+        }
+    }
+
+    // Power-saver on battery, balanced on the charger
+    onOnBatteryChanged: {
+        if (onBattery) {
+            PowerProfiles.profile = PowerProfile.PowerSaver;
+        } else {
+            lastWarned = 101;
+            PowerProfiles.profile = PowerProfile.Balanced;
+        }
+    }
 
     // Some machines have no performance profile, so skip it there
     readonly property var profiles: PowerProfiles.hasPerformanceProfile
