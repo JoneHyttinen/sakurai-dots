@@ -31,7 +31,7 @@ Singleton {
             id: data
             // Used the first time, before dock.json exists
             property var pinned: [
-                "firefox-developer-edition",
+                "firefox",
                 "Alacritty",
                 "org.kde.dolphin",
                 "steam",

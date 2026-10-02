@@ -23,7 +23,7 @@ PanelWindow {
     // Themed tile icons: a Material Symbol name, or "svg" for icons/<id>.svg.
     // Apps not listed here keep their normal icon.
     readonly property var tileIcons: ({
-        "firefox-developer-edition": "svg",
+        "firefox": "svg",
         "Alacritty": "terminal",
         "org.kde.dolphin": "folder",
         "steam": "svg",
@@ -386,6 +386,106 @@ PanelWindow {
                     entry: modelData.entry
                     fallbackIcon: modelData.appId
                     windows: ToplevelManager.toplevels.values.filter(t => root.norm(t.appId) === root.norm(modelData.appId))
+                }
+            }
+                        // ── Memory ──
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 1
+                height: 32
+                color: Theme.colors.outlineVariant
+            }
+
+            MouseArea {
+                id: mem
+                anchors.verticalCenter: parent.verticalCenter
+                width: 48
+                height: 48
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    Panels.dockForced = false;
+                    Quickshell.execDetached(["alacritty", "-e", "btop"]);
+                }
+
+                readonly property real value: SystemStats.memPercent
+                readonly property string ringColor: value > 0.85 ? Theme.colors.error : Theme.colors.primary
+                readonly property string trackColor: Theme.colors.surfaceContainerHigh
+
+                // Redraw the ring when the value or theme colors change
+                onValueChanged: ring.requestPaint()
+                onRingColorChanged: ring.requestPaint()
+                onTrackColorChanged: ring.requestPaint()
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 14
+                    color: Theme.colors.surfaceContainerHigh
+                    opacity: mem.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                }
+
+                Canvas {
+                    id: ring
+                    anchors.centerIn: parent
+                    width: 38
+                    height: 38
+                    antialiasing: true
+                    onAvailableChanged: if (available) requestPaint()
+
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        const c = width / 2;
+                        const r = c - 3;
+                        const start = -Math.PI / 2;  // 12 o'clock
+
+                        ctx.reset();
+                        ctx.lineWidth = 4;
+                        ctx.lineCap = "round";
+
+                        // Track
+                        ctx.strokeStyle = mem.trackColor;
+                        ctx.beginPath();
+                        ctx.arc(c, c, r, 0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        // Usage
+                        ctx.strokeStyle = mem.ringColor;
+                        ctx.beginPath();
+                        ctx.arc(c, c, r, start, start + 2 * Math.PI * mem.value);
+                        ctx.stroke();
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: ring
+                    text: Math.round(mem.value * 100) + "%"
+                    color: Theme.colors.text
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize.tiny
+                    font.weight: Font.Medium
+                }
+
+                // Tooltip with the exact numbers
+                Rectangle {
+                    visible: mem.containsMouse
+                    anchors { bottom: parent.top; bottomMargin: 14; horizontalCenter: parent.horizontalCenter }
+                    width: memTip.implicitWidth + 16
+                    height: 24
+                    radius: 8
+                    color: Theme.colors.surface
+                    border.width: 1
+                    border.color: Theme.colors.outlineVariant
+
+                    Text {
+                        id: memTip
+                        anchors.centerIn: parent
+                        text: "Memory  ·  " + SystemStats.gib(SystemStats.memUsed)
+                            + " / " + SystemStats.gib(SystemStats.memTotal) + " GB"
+                        color: Theme.colors.text
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontSize.small
+                    }
                 }
             }
         }
