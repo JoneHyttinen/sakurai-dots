@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Usage: setwall <image> [source-color]
+#   setwall ~/Pictures/Wallpapers/forest.jpg            # prompts for a color
+#   setwall ~/Pictures/Wallpapers/forest.jpg "#6f6a75"  # uses this color
+# Overrides: MODE=light|dark, TYPE=scheme-...
+set -euo pipefail
+
+wall="$(realpath "$1")"
+source_color="${2:-}"
+
+# ── Wallpaper ────────────────────────────────────────────
+if ! pgrep -x awww-daemon >/dev/null; then
+    awww-daemon >/dev/null 2>&1 &
+    disown
+    sleep 0.5
+fi
+
+awww img "$wall" --transition-type grow --transition-duration 1
+ln -sf "$wall" "$HOME/.cache/wallpaper"   # used by hyprlock and the picker
+
+# ── Scheme and mode ──────────────────────────────────────
+# How colourful and how bright the wallpaper is, from 0 to 1
+sat=$(magick "$wall" -resize 256x256 -colorspace HSL -channel G -separate +channel -format "%[fx:mean]" info:)
+lum=$(magick "$wall" -resize 256x256 -colorspace Gray -format "%[fx:mean]" info:)
+
+type="scheme-tonal-spot"
+mode="dark"
+if awk "BEGIN { exit !($sat < 0.08) }"; then
+    # Practically no colour: grayscale UI that contrasts with the wallpaper
+    type="scheme-monochrome"
+    mode=$(awk "BEGIN { print ($lum > 0.5) ? \"dark\" : \"light\" }")
+fi
+
+# Manual overrides, e.g. MODE=light setwall img.jpg
+type="${TYPE:-$type}"
+mode="${MODE:-$mode}"
+
+# ── Generate all themes ──────────────────────────────────
+if [ -n "$source_color" ]; then
+    matugen color hex "$source_color" -t "$type" -m "$mode"
+else
+    matugen image "$wall" -t "$type" -m "$mode"
+fi
+
+hyprctl reload >/dev/null
+
+# ── GTK: light or dark variant ───────────────────────────
+if [ "$mode" = "light" ]; then
+    gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3"
+    gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
+else
+    gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"
+    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+fi
+
+# ── KDE: replace the global colors, keep all other settings ──
+kdeglobals="$HOME/.config/kdeglobals"
+scheme="$HOME/.local/share/color-schemes/Matugen.colors"
+if [ -f "$scheme" ]; then
+    touch "$kdeglobals"
+    tmp="$kdeglobals.tmp"
+    awk '/^\[/ { skip = ($0 ~ /^\[Colors:/) } !skip && !/^ColorScheme(Hash)?=/' "$kdeglobals" > "$tmp"
+    awk '/^\[/ { keep = ($0 ~ /^\[Colors:/) } keep' "$scheme" >> "$tmp"
+    mv "$tmp" "$kdeglobals"
+fi
+
+# ── Neovim: recolor every running instance ───────────────
+shopt -s nullglob
+for sock in "${XDG_RUNTIME_DIR:-/run/user/$UID}"/nvim.*.0; do
+    nvim --server "$sock" --remote-expr "execute('lua MatugenReload()')" >/dev/null 2>&1 || true
+done
