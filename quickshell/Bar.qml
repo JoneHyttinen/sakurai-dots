@@ -122,6 +122,48 @@ PanelWindow {
                     }
                 }
             }
+            // Divider before the scratchpad
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 1
+                height: 14
+                color: Theme.colors.outlineVariant
+            }
+
+            // Scratchpad (SUPER + S)
+            MouseArea {
+                id: scratch
+                readonly property var wsObj: Hyprland.workspaces.values.find(w => w.name === "special:special") ?? null
+                readonly property bool open: bar.scratchpadOpen
+                readonly property bool occupied: (wsObj?.toplevels.values.length ?? 0) > 0
+
+                anchors.verticalCenter: parent.verticalCenter
+                width: open ? 36 : 26
+                height: 22
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.workspace.toggle_special()"])
+
+                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: height / 2
+                    color: scratch.open ? Theme.colors.primary
+                        : scratch.containsMouse ? Theme.colors.surfaceContainer
+                        : "transparent"
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                }
+
+                Icon {
+                    anchors.centerIn: parent
+                    name: "layers"
+                    font.pixelSize: 16
+                    color: scratch.open ? Theme.colors.primaryText
+                        : scratch.occupied ? Theme.colors.text
+                        : Theme.colors.outline
+                }
+            }
         }
 
         // Clock
@@ -176,4 +218,15 @@ PanelWindow {
             }
         }
     }
+  // Hyprland doesn't update monitor info when a special workspace is
+    // toggled, so ask for fresh data whenever that happens
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            if (event.name === "activespecial") Hyprland.refreshMonitors();
+        }
+    }
+
+    readonly property bool scratchpadOpen:
+        monitor?.lastIpcObject?.specialWorkspace?.name === "special:special"
 }

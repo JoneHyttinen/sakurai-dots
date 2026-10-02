@@ -3,7 +3,11 @@ import Quickshell.Io
 
 ShellRoot {
     Launcher { id: appLauncher }
-    Sidebar { id: appSidebar }
+    WallpaperPicker { id: appWallpaperPicker }
+    Sidebar { 
+      id: appSidebar 
+      wallpaperPicker: appWallpaperPicker
+    }
     NotificationPopups {}
 
     Variants {

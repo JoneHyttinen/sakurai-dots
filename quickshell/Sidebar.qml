@@ -11,6 +11,7 @@ PanelWindow {
     id: root
     property bool shown: false
     property var barWindow: null
+    property var wallpaperPicker: null
 
     // Stay visible while the panel slides out, then hide
     visible: shown || panel.x < width
@@ -195,6 +196,13 @@ PanelWindow {
                         onClicked: Notifs.dnd = !Notifs.dnd
                     }
                     ToggleTile {
+                      width: toggles.tileWidth
+                      icon: "coffee"
+                      label: "Keep awake"
+                      active: Panels.keepAwake
+                      onClicked: Panels.keepAwake = !Panels.keepAwake
+                    }
+                    ToggleTile {
                         width: toggles.tileWidth
                         icon: "nightlight"
                         label: "Night light"
@@ -203,11 +211,13 @@ PanelWindow {
                     }
                     ToggleTile {
                       width: toggles.tileWidth
-                      icon: "coffee"
-                      label: "Keep awake"
-                      active: Panels.keepAwake
-                      onClicked: Panels.keepAwake = !Panels.keepAwake
-                    }
+                      icon: "wallpaper"
+                      label: "Wallpaper"
+                      onClicked: {
+                        root.close();
+                        root.wallpaperPicker?.open(root.screen);
+                      }
+                    }                  
                     ToggleTile {
                         readonly property bool muted: root.sink?.audio?.muted ?? true
                         width: toggles.tileWidth
