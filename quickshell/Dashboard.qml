@@ -94,20 +94,9 @@ BarPopup {
             active: dash.shown && dash.tab === 2
         }
 
-        // Placeholders until those pages are built
-        Repeater {
-            model: ["Notifications"]
-            delegate: Item {
-                required property string modelData
-                implicitHeight: 200
-                Text {
-                    anchors.centerIn: parent
-                    text: parent.modelData + " is coming soon"
-                    color: Theme.colors.subtext
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize.body
-                }
-            }
-        }
+         NotificationsPage {
+            active: dash.shown && dash.tab === 3
+            dashboard: dash
+        }       
     }
 }
