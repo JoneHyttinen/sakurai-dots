@@ -46,5 +46,28 @@ Singleton {
             property string outline: "#8e9099"
             property string outlineVariant: "#44474e"
         }
+  }
+
+    // Light/dark mode, as last applied by setwall
+    readonly property bool dark: themeInfo.mode !== "light"
+
+    function toggleMode() {
+        const next = dark ? "light" : "dark";
+        Quickshell.execDetached(["sh", "-c",
+            'mkdir -p "$HOME/.local/state" && printf %s "$1" > "$HOME/.local/state/theme-mode" '
+            + '&& "$HOME/.local/bin/setwall" "$HOME/.cache/wallpaper" "$2"',
+            "sh", next, themeInfo.color]);
+    }
+
+    FileView {
+        path: Quickshell.env("HOME") + "/.cache/theme-state.json"
+        watchChanges: true
+        onFileChanged: reload()
+
+        JsonAdapter {
+            id: themeInfo
+            property string mode: "dark"
+            property string color: ""
+        }
     }
 }

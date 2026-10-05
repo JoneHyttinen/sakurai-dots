@@ -3,6 +3,7 @@
 -- if you don't use UWSM, define your variables here (e.g. hl.env("QT_QPA_PLATFORM", "wayland"))
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
+hl.env("_JAVA_AWT_WM_NONREPARENTING", 1)
 
 -- if you have an NVIDIA GPU uncomment the following lines:
 

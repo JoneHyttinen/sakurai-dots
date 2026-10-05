@@ -93,6 +93,17 @@ hl.window_rule({
 	},
 })
 
+-- Windowrule for stopping floating for menu windows for different apps
+
+hl.window_rule({
+	move = { "cursor_x", "cursor_y" },
+	match = {
+		class = "^(ghidra-.*)$",
+		title = "^$",
+		float = true,
+	},
+})
+
 -- Correct flat structure for Hyprland Lua window rules
 hl.window_rule({
 	match = { class = "^(cs2)$" },

@@ -31,9 +31,22 @@ if awk "BEGIN { exit !($sat < 0.08) }"; then
   mode=$(awk "BEGIN { print ($lum > 0.5) ? \"dark\" : \"light\" }")
 fi
 
+# Saved choice from the dashboard's light/dark toggle
+pref=$(cat "$HOME/.local/state/theme-mode" 2>/dev/null || true)
+if [ "$pref" = "light" ] || [ "$pref" = "dark" ]; then
+  mode="$pref"
+fi
+
 # Manual overrides, e.g. MODE=light setwall img.jpg
 type="${TYPE:-$type}"
 mode="${MODE:-$mode}"
+
+# No color given and no terminal to ask in (e.g. run from the dashboard):
+# use the wallpaper's most common color
+if [ -z "$source_color" ] && [ ! -t 0 ]; then
+  source_color=$(magick "$wall" -resize 96x96 -colors 8 -format "%c" histogram:info:- |
+    sort -rn | grep -oE '#[0-9A-Fa-f]{6}' | head -n1 || true)
+fi
 
 # ── Generate all themes ──────────────────────────────────
 if [ -n "$source_color" ]; then
@@ -44,13 +57,16 @@ fi
 
 hyprctl reload >/dev/null
 
+# Remember what was used, for the dashboard's light/dark toggle
+printf '{ "mode": "%s", "color": "%s" }\n' "$mode" "$source_color" >"$HOME/.cache/theme-state.json"
+
 # ── GTK: light or dark variant ───────────────────────────
 if [ "$mode" = "light" ]; then
-  dconf write /org/gnome/desktop/interface/gtk-theme "'adw-gtk3'"
-  dconf write /org/gnome/desktop/interface/color-scheme "'prefer-light'"
+  gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3"
+  gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
 else
-  dconf write /org/gnome/desktop/interface/gtk-theme "'adw-gtk3-dark'"
-  dconf write /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
+  gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"
+  gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 fi
 
 # ── KDE: replace the global colors, keep all other settings ──
@@ -62,13 +78,6 @@ if [ -f "$scheme" ]; then
   awk '/^\[/ { skip = ($0 ~ /^\[Colors:/) } !skip && !/^ColorScheme(Hash)?=/' "$kdeglobals" >"$tmp"
   awk '/^\[/ { keep = ($0 ~ /^\[Colors:/) } keep' "$scheme" >>"$tmp"
   mv "$tmp" "$kdeglobals"
-
-  # Tell KDE apps which scheme is active
-  if grep -q '^\[General\]' "$kdeglobals"; then
-    sed -i '/^\[General\]/a ColorScheme=Matugen' "$kdeglobals"
-  else
-    printf '\n[General]\nColorScheme=Matugen\n' >>"$kdeglobals"
-  fi
 fi
 
 # ── Neovim: recolor every running instance ───────────────

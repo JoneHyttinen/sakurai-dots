@@ -25,4 +25,7 @@ Singleton {
         command: ["hyprsunset", "-t", "4500"]
         running: root.nightLight
     }
+
+    signal dashboardToggle(string screenName)
+
 }

@@ -7,9 +7,10 @@ import Quickshell.Wayland
 PanelWindow {
     id: bar
     required property var modelData
-    property var sidebar: null
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
+    property var wallpaperPicker: null
     screen: modelData
+
+    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
 
     anchors { top: true; left: true; right: true }
     implicitHeight: Theme.frame.top
@@ -17,17 +18,37 @@ PanelWindow {
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
-    // "Keep awake" toggle in the sidebar
+    // "Keep awake" toggle in the dashboard
     IdleInhibitor {
         window: bar
         enabled: Panels.keepAwake
+    }
+
+    // Hyprland doesn't update monitor info when a special workspace is
+    // toggled, so ask for fresh data whenever that happens
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            if (event.name === "activespecial") Hyprland.refreshMonitors();
+        }
+    }
+
+    readonly property bool scratchpadOpen:
+        monitor?.lastIpcObject?.specialWorkspace?.name === "special:special"
+
+    // The dashboard keybind opens the dashboard on the focused monitor's bar
+    Connections {
+        target: Panels
+        function onDashboardToggle(screenName) {
+            if (screenName === bar.screen?.name) dashboard.toggle();
+        }
     }
 
     Item {
         anchors.fill: parent
         anchors { leftMargin: Theme.frame.side + 4; rightMargin: Theme.frame.side + 4 }
 
-        // Workspaces
+        // ── Workspaces ───────────────────────────────────
         BarChip {
             anchors { left: parent.left; verticalCenter: parent.verticalCenter }
             padding: 6
@@ -70,7 +91,6 @@ PanelWindow {
                 }
             }
 
-            // Divider after the games workspace
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
@@ -78,6 +98,7 @@ PanelWindow {
                 color: Theme.colors.outlineVariant
             }
 
+            // Numbered workspaces on this monitor
             Repeater {
                 model: Hyprland.workspaces
                 delegate: MouseArea {
@@ -122,7 +143,7 @@ PanelWindow {
                     }
                 }
             }
-            // Divider before the scratchpad
+
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
@@ -166,28 +187,44 @@ PanelWindow {
             }
         }
 
-        // Clock
-        BarChip {
+        // ── Clock; click for the dashboard ───────────────
+        MouseArea {
             anchors.centerIn: parent
+            width: clockChip.width
+            height: clockChip.height
+            cursorShape: Qt.PointingHandCursor
+            onClicked: dashboard.toggle()
 
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: Qt.formatDateTime(clock.date, "ddd d MMM   HH:mm")
-                color: Theme.colors.text
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize.body
-                font.weight: Font.Medium
+            BarChip {
+                id: clockChip
+                color: dashboard.shown ? Theme.colors.surfaceContainer : Theme.colors.surfaceContainerHigh
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Qt.formatDateTime(clock.date, "ddd d MMM   HH:mm")
+                    color: dashboard.shown ? Theme.colors.primary : Theme.colors.text
+                    font.family: Theme.font
+                    font.pixelSize: Theme.fontSize.body
+                    font.weight: Font.Medium
+                }
+            }
+
+            Dashboard {
+                id: dashboard
+                anchorItem: clockChip
+                barWindow: bar
+                wallpaperPicker: bar.wallpaperPicker
             }
         }
 
-        // Right side
+        // ── Right side ───────────────────────────────────
         Row {
             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
             spacing: 6
 
             BarChip {
                 visible: SystemTray.items.values.length > 0
-                padding: 4
+                padding: 8
                 Tray { anchors.verticalCenter: parent.verticalCenter }
             }
 
@@ -195,38 +232,28 @@ PanelWindow {
                 spacing: 14
                 Volume { anchors.verticalCenter: parent.verticalCenter }
                 Network { anchors.verticalCenter: parent.verticalCenter }
-                Battery { anchors.verticalCenter: parent.verticalCenter }
                 NotifButton { anchors.verticalCenter: parent.verticalCenter }
             }
 
-            BarChip {
-                padding: 8
+            // Dashboard button
+            MouseArea {
+                anchors.verticalCenter: parent.verticalCenter
+                width: tuneChip.width
+                height: tuneChip.height
+                cursorShape: Qt.PointingHandCursor
+                onClicked: dashboard.toggle()
 
-                MouseArea {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: sbIcon.implicitWidth
-                    height: sbIcon.implicitHeight
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: bar.sidebar?.toggle(bar.screen, bar)
+                BarChip {
+                    id: tuneChip
+                    padding: 8
 
                     Icon {
-                        id: sbIcon
+                        anchors.verticalCenter: parent.verticalCenter
                         name: "tune"
-                        color: bar.sidebar?.shown ? Theme.colors.primary : Theme.colors.text
+                        color: dashboard.shown ? Theme.colors.primary : Theme.colors.text
                     }
                 }
             }
         }
     }
-  // Hyprland doesn't update monitor info when a special workspace is
-    // toggled, so ask for fresh data whenever that happens
-    Connections {
-        target: Hyprland
-        function onRawEvent(event) {
-            if (event.name === "activespecial") Hyprland.refreshMonitors();
-        }
-    }
-
-    readonly property bool scratchpadOpen:
-        monitor?.lastIpcObject?.specialWorkspace?.name === "special:special"
 }
