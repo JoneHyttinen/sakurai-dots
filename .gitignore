@@ -1,0 +1,17 @@
+# Ignore everything in ~/.config...
+/*
+
+# ...except the configs I manage on purpose
+!/.gitignore
+!/hypr/
+!/quickshell/
+!/matugen/
+!/nvim/
+!/alacritty/
+!/qt6ct/
+
+hypr/config/matugen.lua
+hypr/hyprlock-colors.conf
+alacritty/matugen.toml
+nvim/lua/matugen_palette.lua
+qt6ct/colors/
