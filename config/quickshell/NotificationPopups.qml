@@ -4,7 +4,7 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
-    screen: Quickshell.screens.find(s => s.name === "DP-1") ?? Quickshell.screens[0]
+    screen: Quickshell.screens.find(s => s.name === Host.primaryMonitor) ?? Quickshell.screens[0]
 
     // A fixed, always-mapped window over the right side; only the panel
     // inside it changes size, and only the panel takes clicks
