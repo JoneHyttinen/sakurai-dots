@@ -35,7 +35,7 @@ PanelWindow {
     property var launcher: null
 
     anchors { bottom: true; left: true; right: true }
-    implicitHeight: 300  // room above the dock for tooltips, previews and the menu
+    implicitHeight: 640  // room above the dock for tooltips, previews and the menu
     color: "transparent"
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: 0  // sit above the frame's bottom band, without reserving space
@@ -65,7 +65,10 @@ PanelWindow {
         return pinned.map(id => DesktopEntries.byId(id)).filter(e => e !== null);
     }
 
-    // Running apps that aren't pinned, one per app
+    // Session order of running (unpinned) apps, by normalized app id
+    property var runningOrder: []
+
+    // Running apps that aren't pinned, one per app, in the order you dragged them
     readonly property var running: {
         const claimed = new Set();
         for (const e of pinnedEntries)
@@ -79,7 +82,38 @@ PanelWindow {
             seen.add(key);
             out.push({ appId: t.appId, entry: DesktopEntries.heuristicLookup(t.appId) });
         }
-        return out;
+
+        const rank = k => {
+            const i = runningOrder.indexOf(k);
+            return i === -1 ? runningOrder.length : i;
+        };
+        return out
+            .map((r, i) => ({ r: r, i: i }))
+            .sort((a, b) => (rank(norm(a.r.appId)) - rank(norm(b.r.appId))) || (a.i - b.i))
+            .map(x => x.r);
+    }
+
+    // ── Drag to reorder ──────────────────────────────────────
+
+    readonly property int slotWidth: 56  // icon width + row spacing
+    property string dragGroup: ""        // "pinned" or "running" while dragging
+    property int dragFrom: -1
+    property int dragTo: -1
+
+    function movePinned(from, to) {
+        const ids = pinnedEntries.map(e => e.id);
+        const [moved] = ids.splice(from, 1);
+        ids.splice(to, 0, moved);
+        // Keep pinned ids that aren't shown (e.g. uninstalled apps) at the end
+        const rest = DockPins.ids.filter(i => !ids.includes(i));
+        DockPins.setOrder(ids.concat(rest));
+    }
+
+    function moveRunning(from, to) {
+        const keys = running.map(r => norm(r.appId));
+        const [moved] = keys.splice(from, 1);
+        keys.splice(to, 0, moved);
+        runningOrder = keys;
     }
 
     // ── Hover previews ───────────────────────────────────────
@@ -170,13 +204,107 @@ PanelWindow {
         readonly property string tileIcon: root.tileIcons[entry?.id ?? ""] ?? ""
         readonly property bool running: windows.length > 0
 
+        // Reordering
+        property string group: ""   // "pinned" or "running"
+        property int slot: 0        // position within the group
+        property int groupCount: 0
+        property real pressSceneX: 0
+        property real dragDx: 0
+        property bool dragging: false
+        property bool wasDragged: false
+        property bool dropping: false   // gliding into its slot after release
+        property real dropX: 0
+
+        // How far this icon moves aside while another icon is dragged past it
+        readonly property real shift: {
+            if (dragging || dropping || root.dragGroup !== group) return 0;
+            const f = root.dragFrom, t = root.dragTo;
+            if (f < t && slot > f && slot <= t) return -root.slotWidth;
+            if (f > t && slot >= t && slot < f) return root.slotWidth;
+            return 0;
+        }
+
+        // Where the icon is drawn: under the mouse while dragging, gliding while
+        // dropping, otherwise moved aside to make room for another icon
+        readonly property real offsetX: dragging ? dragDx : dropping ? dropX : shift
+        property real shownX: offsetX
+        Behavior on shownX {
+            enabled: !item.dragging && !item.dropping
+            NumberAnimation { duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
+        }
+
         width: 48
         height: 48
+        z: dragging || dropping ? 10 : 0
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: dragging ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+
+        transform: Translate { x: item.shownX }
+
+        onPressed: mouse => {
+            pressSceneX = mapToItem(null, mouse.x, 0).x;
+            wasDragged = false;
+        }
+
+        onPositionChanged: mouse => {
+            if (!(pressedButtons & Qt.LeftButton) || group === "" || dropping) return;
+
+            const dx = mapToItem(null, mouse.x, 0).x - pressSceneX;
+
+            // Start dragging after a few pixels, so normal clicks still work
+            if (!dragging && Math.abs(dx) > 8) {
+                dragging = true;
+                wasDragged = true;
+                root.previewFor = null;
+                root.dragGroup = group;
+                root.dragFrom = slot;
+                root.dragTo = slot;
+            }
+            if (dragging) {
+                dragDx = dx;
+                root.dragTo = Math.max(0, Math.min(groupCount - 1,
+                    slot + Math.round(dragDx / root.slotWidth)));
+            }
+        }
+
+        onReleased: {
+            if (!dragging) return;
+            // Glide from the mouse position into the target slot...
+            dropX = dragDx;
+            dropping = true;
+            dragging = false;
+            dropAnim.to = (root.dragTo - root.dragFrom) * root.slotWidth;
+            dropAnim.restart();
+        }
+
+        NumberAnimation {
+            id: dropAnim
+            target: item
+            property: "dropX"
+            duration: 180
+            easing.type: Easing.OutCubic
+            onFinished: item.finishDrop()
+        }
+
+        // ...then save the new order. Everything is already drawn in its final
+        // place, so rebuilding the dock causes no visible jump.
+        function finishDrop() {
+            const from = root.dragFrom, to = root.dragTo, g = group;
+            dropping = false;
+            dropX = 0;
+            dragDx = 0;
+            root.dragGroup = "";
+            root.dragFrom = -1;
+            root.dragTo = -1;
+            if (from !== to) {
+                if (g === "pinned") root.movePinned(from, to);
+                else root.moveRunning(from, to);
+            }
+        }
 
         onContainsMouseChanged: {
+            if (dragging || dropping) return;
             if (containsMouse) {
                 root.hovered = item;
                 root.previewFor = (windows.length >= 2 && root.menuFor === null) ? item : null;
@@ -187,6 +315,7 @@ PanelWindow {
         }
 
         onClicked: mouse => {
+            if (wasDragged) return;  // a drag isn't a click
             if (mouse.button === Qt.RightButton) {
                 root.openMenu(item);
                 return;
@@ -208,7 +337,7 @@ PanelWindow {
             anchors.fill: parent
             radius: 14
             color: Theme.colors.surfaceContainerHigh
-            opacity: item.containsMouse ? 1 : 0
+            opacity: item.containsMouse && !item.dragging && !item.dropping ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
@@ -217,11 +346,11 @@ PanelWindow {
             id: tile
             visible: item.tileIcon !== ""
             anchors.centerIn: parent
-            width: 40
-            height: 40
+            width: 42
+            height: 42
             radius: 12
             color: item.running ? Theme.colors.primary : Theme.colors.surfaceContainerHigh
-            scale: item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
+            scale: item.dragging || item.dropping ? 1.12 : item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
             Behavior on color { ColorAnimation { duration: 200 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
@@ -258,7 +387,7 @@ PanelWindow {
             anchors.centerIn: parent
             implicitSize: 36
             source: Quickshell.iconPath(item.entry?.icon || item.fallbackIcon)
-            scale: item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
+            scale: item.dragging || item.dropping ? 1.12 : item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
         }
 
@@ -278,9 +407,10 @@ PanelWindow {
             }
         }
 
-        // Tooltip with the app's name (not while previews or the menu are showing)
+        // Tooltip with the app's name (not while dragging, previews or the menu are showing)
         Rectangle {
-            visible: item.containsMouse && item.label !== "" && root.previewFor !== item && root.menuFor !== item
+            visible: item.containsMouse && !item.dragging && !item.dropping && item.label !== ""
+                && root.previewFor !== item && root.menuFor !== item
             anchors { bottom: parent.top; bottomMargin: 14; horizontalCenter: parent.horizontalCenter }
             width: tip.implicitWidth + 16
             height: 24
@@ -363,9 +493,13 @@ PanelWindow {
                 model: root.pinnedEntries
                 delegate: DockItem {
                     required property var modelData
+                    required property int index
                     anchors.verticalCenter: parent.verticalCenter
                     entry: modelData
                     windows: root.windowsFor(modelData)
+                    group: "pinned"
+                    slot: index
+                    groupCount: root.pinnedEntries.length
                 }
             }
 
@@ -382,13 +516,18 @@ PanelWindow {
                 model: root.running
                 delegate: DockItem {
                     required property var modelData
+                    required property int index
                     anchors.verticalCenter: parent.verticalCenter
                     entry: modelData.entry
                     fallbackIcon: modelData.appId
                     windows: ToplevelManager.toplevels.values.filter(t => root.norm(t.appId) === root.norm(modelData.appId))
+                    group: "running"
+                    slot: index
+                    groupCount: root.running.length
                 }
             }
-                        // ── Memory ──
+
+            // ── Memory ──
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
