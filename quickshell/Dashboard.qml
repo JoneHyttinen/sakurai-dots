@@ -86,9 +86,13 @@ BarPopup {
             targetScreen: dash.barWindow?.screen ?? null
         }
 
+        MediaPage {
+            active: dash.shown && dash.tab === 1
+        }
+
         // Placeholders until those pages are built
         Repeater {
-            model: ["Media", "System", "Notifications"]
+            model: ["System", "Notifications"]
             delegate: Item {
                 required property string modelData
                 implicitHeight: 200
