@@ -90,9 +90,13 @@ BarPopup {
             active: dash.shown && dash.tab === 1
         }
 
+        SystemPage {
+            active: dash.shown && dash.tab === 2
+        }
+
         // Placeholders until those pages are built
         Repeater {
-            model: ["System", "Notifications"]
+            model: ["Notifications"]
             delegate: Item {
                 required property string modelData
                 implicitHeight: 200
