@@ -61,12 +61,18 @@ hyprctl reload >/dev/null
 printf '{ "mode": "%s", "color": "%s" }\n' "$mode" "$source_color" >"$HOME/.cache/theme-state.json"
 
 # ── GTK: light or dark variant ───────────────────────────
-if [ "$mode" = "light" ]; then
-  gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3"
-  gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
-else
-  gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"
-  gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+# Written straight to dconf, which gsettings uses underneath; unlike
+# gsettings, this needs no installed schemas (they're per-app on NixOS)
+if command -v dconf >/dev/null 2>&1; then
+  if [ "$mode" = "light" ]; then
+    gtk_theme="adw-gtk3"
+    color_scheme="prefer-light"
+  else
+    gtk_theme="adw-gtk3-dark"
+    color_scheme="prefer-dark"
+  fi
+  dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
+  dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
 fi
 
 # ── KDE: replace the global colors, keep all other settings ──

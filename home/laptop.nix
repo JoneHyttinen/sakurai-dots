@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 let
   quickshell = pkgs.symlinkJoin {
     name = "quickshell";
@@ -28,6 +28,12 @@ in
       kdePackages.breeze
       kdePackages.breeze-icons
       adw-gtk3
+      dconf
+
+      # setwall on the PATH; runs the script straight from the repo
+      (writeShellScriptBin "setwall" ''
+        exec ${config.home.homeDirectory}/dotfiles/config/hypr/scripts/setwall "$@"
+      '')
 
       # Hypr ecosystem
       hypridle

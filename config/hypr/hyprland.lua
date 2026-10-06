@@ -31,7 +31,7 @@ require("config.misc")
 require("config.windowrules")
 require("config.workspaces")
 require("config.plugins")
-require("config.matugen")
+pcall(require, "config.matugen")
 
 if host == "elitebook" then
 	require("config.laptop")
