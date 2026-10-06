@@ -7,4 +7,3 @@ config/hypr/hyprlock-colors.conf
 config/alacritty/matugen.toml
 config/nvim/lua/matugen_palette.lua
 config/qt6ct/colors/matugen.conf
-nvim/lua/matugen_palette.lua
