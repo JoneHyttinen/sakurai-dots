@@ -91,3 +91,8 @@ shopt -s nullglob
 for sock in "${XDG_RUNTIME_DIR:-/run/user/$UID}"/nvim.*.0; do
   nvim --server "$sock" --remote-expr "execute('lua MatugenReload()')" >/dev/null 2>&1 || true
 done
+
+# ── Firefox: Pywalfox picks up the new colors ────────────
+if command -v pywalfox >/dev/null 2>&1; then
+  pywalfox update >/dev/null 2>&1 || true
+fi

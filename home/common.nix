@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   # Live links into the repo (not copies in the Nix store), so edits take
   # effect immediately and Quickshell's hot reload keeps working
@@ -27,4 +27,18 @@ in
 
   # setwall lives in the repo; this puts it on your PATH
   home.file.".local/bin/setwall".source = link "hypr/scripts/setwall";
+
+  home.packages = [
+    # Pull the dotfiles and apply them on either machine
+    (pkgs.writeShellScriptBin "dots-sync" ''
+      set -e
+      cd ${config.home.homeDirectory}/dotfiles
+      git pull --rebase
+      if [ -e /etc/NIXOS ]; then
+        sudo nixos-rebuild switch --flake .
+      else
+        home-manager switch --flake .
+      fi
+    '')
+  ];
 }

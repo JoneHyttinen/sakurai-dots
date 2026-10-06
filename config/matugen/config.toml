@@ -35,3 +35,7 @@ output_path = '~/.local/share/color-schemes/Matugen.colors'
 [templates.nvim]
 input_path = '~/.config/matugen/templates/nvim-palette.lua'
 output_path = '~/.config/nvim/lua/matugen_palette.lua'
+
+[templates.pywalfox]
+input_path = '~/.config/matugen/templates/pywalfox.json'
+output_path = '~/.cache/wal/colors.json'
