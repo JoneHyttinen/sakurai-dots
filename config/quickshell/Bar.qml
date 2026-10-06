@@ -232,6 +232,7 @@ PanelWindow {
                 spacing: 14
                 Volume { anchors.verticalCenter: parent.verticalCenter }
                 Network { anchors.verticalCenter: parent.verticalCenter }
+                Battery { anchors.verticalCenter: parent.verticalCenter }
                 NotifButton { anchors.verticalCenter: parent.verticalCenter }
             }
 
