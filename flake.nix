@@ -24,6 +24,22 @@
         ];
       };
 
-      # Laptop (NixOS) gets added here in step 4, as nixosConfigurations.<name>
+      # Laptop (NixOS)
+      nixosConfigurations."elitebook" = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+          ./hosts/laptop/configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              # Existing files in the way get renamed to *.backup instead of failing
+              home-manager.backupFileExtension = "backup";
+              home-manager.users.sakurai = {
+                  imports = [ ./home/common.nix ./home/laptop.nix ];
+              };
+          }
+        ];
+      };
     };
 }

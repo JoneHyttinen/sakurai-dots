@@ -17,3 +17,8 @@ hl.monitor({
 	position = "auto",
 	scale = "auto",
 })
+
+-- Hyprland plugins
+hl.on("hyprland.start", function()
+	hl.exec_cmd("hyprpm reload -n")
+end)

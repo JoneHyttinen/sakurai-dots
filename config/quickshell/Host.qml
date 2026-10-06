@@ -13,7 +13,7 @@ Singleton {
             primaryMonitor: "DP-1",
             laptop: false,
         },
-        "LAPTOP-HOSTNAME": {
+        "elitebook": {
             primaryMonitor: "eDP-1",
             laptop: true,
         },
