@@ -22,6 +22,7 @@ in
     "matugen".source = link "matugen";
     "qt6ct".source = link "qt6ct";
     "quickshell".source = link "quickshell";
+    "nvim".source = link "nvim";
   };
 
   # setwall lives in the repo; this puts it on your PATH
