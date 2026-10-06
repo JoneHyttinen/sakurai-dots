@@ -39,3 +39,7 @@ output_path = '~/.config/nvim/lua/matugen_palette.lua'
 [templates.pywalfox]
 input_path = '~/.config/matugen/templates/pywalfox.json'
 output_path = '~/.cache/wal/colors.json'
+
+[templates.vesktop]
+input_path = '~/.config/matugen/templates/vesktop.css'
+output_path = '~/.config/vesktop/themes/matugen.theme.css'
