@@ -96,3 +96,8 @@ done
 if command -v pywalfox >/dev/null 2>&1; then
   pywalfox update >/dev/null 2>&1 || true
 fi
+
+# ── Spotify: apply the new colors ────────────────────────
+if command -v spicetify >/dev/null 2>&1; then
+  spicetify refresh >/dev/null 2>&1 || true
+fi
