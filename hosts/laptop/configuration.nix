@@ -46,10 +46,14 @@
     LC_TIME = "fi_FI.UTF-8";
   };
 
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "fi";
-    variant = "";
+  # X11, used for the XFCE fallback session
+  services.xserver = {
+    enable = true;
+    xkb = {
+      layout = "fi";
+      variant = "";
+    };
+    desktopManager.xfce.enable = true;
   };
 
   # Configure console keymap
@@ -105,7 +109,13 @@
       percentageCritical = 5;
       percentageAction = 3;
       criticalPowerAction = "PowerOff";
-    };
+  };
+
+  services.thermald.enable = true;
+
+  hardware.graphics.extraPackages = [ pkgs.intel-media-driver ];
+
+  nix.settings.auto-optimise-store = true;
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
@@ -115,33 +125,22 @@
      kitty
      wget
      firefox
-   ];
+     adwaita-icon-theme
+  ];
 
-  # Login screen: tuigreet, which starts Hyprland after you log in
-  services.greetd = {
-     enable = true;
-     settings.default_session = {
-	command = builtins.concatStringsSep " " [
- 	  "${pkgs.tuigreet}/bin/tuigreet"
-	  "--time"
-	  "--asterisks"
-	  "--remember"
-	  "--remember-session"
-	  "--sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions"
-	];
-	user = "greeter";
-     };
-  };
+  environment.sessionVariables.SECLISTS = "${pkgs.seclists}/share/wordlists/seclists";
 
-  # Keep boot messages from being printed over the login screen
-  systemd.services.greetd.serviceConfig = {
-     Type = "idle";
-     StandardInput = "tty";
-     StandardOutput = "tty";
-     StandardError = "journal";
-     TTYReset = true;
-     TTYVHangup = true;
-     TTYVTDisallocate = true;
+   # Login screen: SDDM, with a session menu for Hyprland and XFCE
+  services.displayManager = {
+    sddm = {
+      enable = true;
+      wayland.enable = false;
+      settings.Theme = {
+          CursorTheme = "Adwaita";
+          CursorSize = 24;
+      };
+    };
+    defaultSession = "hyprland-uwsm";
   };
 
   # Some programs need SUID wrappers, can be configured further or are

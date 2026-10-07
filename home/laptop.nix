@@ -87,6 +87,18 @@ in
 
       # Other...
       solaar
+
+      # Hacking/firmware tools 
+      ghidra
+      binwalk
+      p7zip
+      squashfsTools
+      sasquatch
+      jefferson
+      ubi_reader
+      unblob
+      ffuf
+      seclists
   ];
 
   fonts.fontconfig.enable = true;
