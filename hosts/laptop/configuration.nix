@@ -59,7 +59,7 @@
   users.users."sakurai" = {
     isNormalUser = true;
     description = "Jone";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
     packages = with pkgs; [];
   };
 
@@ -69,7 +69,10 @@
   # Enable the newer nix CLI and flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Laptop power management
+  # Brightness: let your user change the backlight without sudo
+  services.udev.packages = [ pkgs.brightnessctl ];
+
+  # Power profiles (Saver / Balanced / Performance)
   services.power-profiles-daemon.enable = true;
 
   # Qt theming

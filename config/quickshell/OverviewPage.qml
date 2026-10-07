@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
+import Quickshell.Services.UPower
 import Quickshell.Widgets
 
 Item {
@@ -184,6 +185,96 @@ Item {
                             }
                         }
                     }
+                    // Screen brightness (laptops)
+                    Row {
+                        visible: Brightness.available
+                        width: sliders.width
+                        spacing: 10
+
+                        Icon {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 24
+                            horizontalAlignment: Text.AlignHCenter
+                            name: "brightness_medium"
+                            color: Theme.colors.subtext
+                        }
+                        SliderBar {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - 78
+                            value: Brightness.percent
+                            onMoved: v => Brightness.set(v)
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 34
+                            horizontalAlignment: Text.AlignRight
+                            text: Math.round(Brightness.percent * 100) + "%"
+                            color: Theme.colors.text
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontSize.small
+                        }
+                    }
+            // Power profiles (laptop)
+            Rectangle {
+                visible: Host.laptop
+                width: parent.width
+                height: 76
+                radius: Theme.radius
+                color: Theme.colors.surfaceContainer
+
+                Row {
+                    id: profiles
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Repeater {
+                        model: [
+                            { icon: "energy_savings_leaf", label: "Saver",       profile: PowerProfile.PowerSaver },
+                            { icon: "balance",             label: "Balanced",    profile: PowerProfile.Balanced },
+                            { icon: "bolt",                label: "Performance", profile: PowerProfile.Performance },
+                        ]
+                        delegate: MouseArea {
+                            id: pp
+                            required property var modelData
+                            readonly property bool active: PowerProfiles.profile === modelData.profile
+
+                            // Some laptops have no performance profile
+                            visible: modelData.profile !== PowerProfile.Performance || PowerProfiles.hasPerformanceProfile
+                            width: 84
+                            height: 56
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: PowerProfiles.profile = modelData.profile
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 12
+                                color: pp.active ? Theme.colors.primary
+                                    : pp.containsMouse ? Theme.colors.surfaceContainerHigh
+                                    : "transparent"
+                                Behavior on color { ColorAnimation { duration: 150 } }
+                            }
+                            Column {
+                                anchors.centerIn: parent
+                                spacing: 2
+                                Icon {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    name: pp.modelData.icon
+                                    color: pp.active ? Theme.colors.primaryText : Theme.colors.text
+                                }
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: pp.modelData.label
+                                    color: pp.active ? Theme.colors.primaryText : Theme.colors.subtext
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize.tiny
+                                    font.weight: Font.Medium
+                                }
+                            }
+                        }
+                    }
+                }
+            }
                 }
             }
         }

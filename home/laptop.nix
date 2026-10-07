@@ -85,6 +85,7 @@ in
       # Laptop specific
       brightnessctl
 
+      # Other...
       solaar
   ];
 
