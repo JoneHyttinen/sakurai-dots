@@ -1,7 +1,7 @@
 import QtQuick
 
 // A panel background that merges into the screen frame.
-// edge: "top" | "bottom" | "right" | "topRight"
+// edge: "top" | "bottom" | "right" | "topRight" | "rightMid"
 Canvas {
     id: bg
     property string edge: "top"
@@ -60,6 +60,16 @@ Canvas {
             ctx.arc(r + c, h - r - c, c, PI / 2, PI, false);
             ctx.lineTo(r, r);
             ctx.arc(0, r, r, 0, -PI / 2, true);
+        } else if (edge === "rightMid") {
+            // Attached to the middle of the right band; body spans y = r..h-r
+            ctx.moveTo(w, 0);
+            ctx.arc(w - r, 0, r, 0, PI / 2, false);                  // concave top
+            ctx.lineTo(c, r);
+            ctx.arc(c, r + c, c, -PI / 2, PI, true);                 // rounded top-left
+            ctx.lineTo(0, h - r - c);
+            ctx.arc(c, h - r - c, c, PI, PI / 2, true);              // rounded bottom-left
+            ctx.lineTo(w - r, h - r);
+            ctx.arc(w - r, h, r, -PI / 2, 0, false);                 // concave bottom
         }
 
         ctx.closePath();

@@ -7,6 +7,7 @@ ShellRoot {
     ClipboardPicker {}
     WallpaperPicker { id: appWallpaperPicker }
     NotificationPopups {}
+    OSD {}
 
     IpcHandler {
         target: "dock"
