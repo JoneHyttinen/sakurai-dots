@@ -9,6 +9,7 @@ import Quickshell.Services.Pipewire
 Item {
     id: page
     property bool active: false  // true while this tab is showing; runs the visualizer
+    property var dashboard: null  // closed when jumping to the player
 
     // The player picked in the list, or else the one that's playing
     property var chosen: null
@@ -234,6 +235,15 @@ Item {
                     name: "music_note"
                     font.pixelSize: 56
                     color: Theme.colors.subtext
+                }
+                // Click the cover to jump to the player's window
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        page.dashboard?.close();
+                        MediaFocus.focus(page.player);
+                    }
                 }
             }
 

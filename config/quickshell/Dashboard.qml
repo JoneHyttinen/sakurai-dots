@@ -88,6 +88,7 @@ BarPopup {
 
         MediaPage {
             active: dash.shown && dash.tab === 1
+            dashboard: dash
         }
 
         SystemPage {

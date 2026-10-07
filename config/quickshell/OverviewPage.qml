@@ -242,6 +242,15 @@ Item {
                         font.pixelSize: 28
                         color: Theme.colors.subtext
                     }
+                    // Click the cover to jump to the player's window
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            page.dashboard?.close();
+                            MediaFocus.focus(page.player);
+                        }
+                    }
                 }
 
                 Column {
