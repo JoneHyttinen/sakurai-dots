@@ -42,6 +42,7 @@ in
 
       # Used by shell features
       wl-clipboard
+      cliphist
       libnotify
       pavucontrol
       networkmanagerapplet

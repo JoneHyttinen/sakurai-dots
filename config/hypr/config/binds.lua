@@ -136,7 +136,8 @@ hl.bind("CTRL + Print", hl.dsp.exec_cmd("grim ~/Pictures/Screenshots/$(date +%Y-
 -- Theming and Wallpaper
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
 
--- Clipboard
+-- Clipboard history
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 
 -- Notifications
 

@@ -4,6 +4,7 @@ import Quickshell.Io
 
 ShellRoot {
     Launcher { id: appLauncher }
+    ClipboardPicker {}
     WallpaperPicker { id: appWallpaperPicker }
     NotificationPopups {}
 
