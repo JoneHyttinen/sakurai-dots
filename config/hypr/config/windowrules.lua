@@ -65,6 +65,7 @@ hl.window_rule({
 })
 hl.window_rule({ match = { class = "^(.*[Ll]auncher.*)$" }, float = true, monitor = PRIMARY_MONITOR })
 hl.window_rule({ match = { class = "^(vesktop|discord|Spotify)$" }, monitor = MONITOR2 })
+hl.window_rule({ match = { class = "^(Spotify)$" }, opacity = "0.95 override" })
 hl.window_rule({
 	match = { class = "^(.*[Cc]alc.*)$" },
 	float = true,
