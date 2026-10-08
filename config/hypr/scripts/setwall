@@ -101,3 +101,11 @@ fi
 if command -v spicetify >/dev/null 2>&1; then
   spicetify refresh >/dev/null 2>&1 || true
 fi
+
+# ── fetch: a logo using the themed terminal colors ───────
+# fetch would otherwise ask fastfetch for the logo by name,
+# which brings back the distro's default colors
+if command -v fastfetch >/dev/null 2>&1; then
+  mkdir -p "$HOME/.config/fetch"
+  fastfetch -s break --pipe false >"$HOME/.config/fetch/logo.txt" 2>/dev/null || true
+fi

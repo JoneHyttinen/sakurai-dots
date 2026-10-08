@@ -6,12 +6,12 @@
   "logo": {
     "padding": { "top": 1, "left": 2, "right": 3 },
     "color": {
-      "1": "38;2;{{colors.primary.default.red}};{{colors.primary.default.green}};{{colors.primary.default.blue}}",
-      "2": "38;2;{{colors.secondary.default.red}};{{colors.secondary.default.green}};{{colors.secondary.default.blue}}",
-      "3": "38;2;{{colors.tertiary.default.red}};{{colors.tertiary.default.green}};{{colors.tertiary.default.blue}}",
-      "4": "38;2;{{colors.on_surface.default.red}};{{colors.on_surface.default.green}};{{colors.on_surface.default.blue}}",
-      "5": "38;2;{{colors.on_surface_variant.default.red}};{{colors.on_surface_variant.default.green}};{{colors.on_surface_variant.default.blue}}",
-      "6": "38;2;{{colors.primary.default.red}};{{colors.primary.default.green}};{{colors.primary.default.blue}}"
+      "1": "95",
+      "2": "94",
+      "3": "96",
+      "4": "95",
+      "5": "94",
+      "6": "96"
     }
   },
 

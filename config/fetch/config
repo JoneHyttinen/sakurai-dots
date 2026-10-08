@@ -1,0 +1,17 @@
+# Labels in bright magenta, which Alacritty shows in the theme's primary color
+label_color=95
+
+os
+host
+kernel
+uptime
+packages
+shell
+wm
+terminal
+cpu
+gpu
+memory
+disk
+battery
+colors

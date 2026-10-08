@@ -9,3 +9,8 @@ text = "{{colors.on_primary.default.hex}}"
 [colors.selection]
 background = "{{colors.primary.default.hex}}"
 text = "{{colors.on_primary.default.hex}}"
+
+[colors.bright]
+magenta = "{{colors.primary.default.hex}}"
+blue = "{{colors.secondary.default.hex}}"
+cyan = "{{colors.tertiary.default.hex}}"
