@@ -7,6 +7,12 @@
         "frameTop": 45,
         "radius": 12
     },
+    "dock": {
+        "mode": "empty",
+        "showMemory": true,
+        "showRunning": true,
+        "themedTiles": true
+    },
     "notifications": {
         "keepCritical": true,
         "maxPopups": 4,

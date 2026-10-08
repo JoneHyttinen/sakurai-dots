@@ -8,6 +8,7 @@ Singleton {
     id: root
     property alias appearance: adapter.appearance
     property alias notifications: adapter.notifications
+    property alias dock: adapter.dock
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/quickshell/settings.json"
@@ -37,6 +38,13 @@ Singleton {
                 property int maxPopups: 5
                 property string screen: "primary" // "primary" or "focused"
                 property bool keepCritical: true
+            }
+
+            property JsonObject dock: JsonObject {
+                property string mode: "empty"  // "empty", "always" or "never"
+                property bool showRunning: true
+                property bool showMemory: true
+                property bool themedTiles: true
             }
         }
     }

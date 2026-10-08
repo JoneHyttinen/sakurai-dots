@@ -15,7 +15,7 @@ PanelWindow {
     readonly property bool emptyWorkspace: workspace !== null && workspace.toplevels.values.length === 0
     // SUPER + D shows it on the focused monitor, over windows
     readonly property bool forced: Panels.dockForced && Hyprland.focusedMonitor?.name === modelData.name
-    readonly property bool shown: emptyWorkspace || forced
+    readonly property bool shown: Config.dock.mode === "always" ? true : Config.dock.mode === "never" ? forced : emptyWorkspace || forced
 
     // Pinned apps, saved to disk (see DockPins.qml)
     readonly property var pinned: DockPins.ids
@@ -23,28 +23,37 @@ PanelWindow {
     // Themed tile icons: a Material Symbol name, or "svg" for icons/<id>.svg.
     // Apps not listed here keep their normal icon.
     readonly property var tileIcons: ({
-        "firefox": "svg",
-        "Alacritty": "terminal",
-        "org.kde.dolphin": "folder",
-        "steam": "svg",
-        "spotify": "svg",
-        "discord": "svg",
-        "vesktop": "svg",
-    })
+            "firefox": "svg",
+            "Alacritty": "terminal",
+            "org.kde.dolphin": "folder",
+            "steam": "svg",
+            "spotify": "svg",
+            "discord": "svg",
+            "vesktop": "svg"
+        })
 
     // Set from shell.qml; the dock's "all apps" button opens it
     property var launcher: null
 
-    anchors { bottom: true; left: true; right: true }
+    anchors {
+        bottom: true
+        left: true
+        right: true
+    }
     implicitHeight: 640  // room above the dock for tooltips, previews and the menu
     color: "transparent"
     exclusionMode: ExclusionMode.Normal
-    exclusiveZone: 0  // sit above the frame's bottom band, without reserving space
+    // In "always" mode, keep windows from going under the dock
+    exclusiveZone: Config.dock.mode === "always" ? dock.height : 0
     WlrLayershell.namespace: "qs-dock"
     mask: Region {
         item: dock
-        Region { item: previews.visible ? previews : null }
-        Region { item: menu.visible ? menu : null }
+        Region {
+            item: previews.visible ? previews : null
+        }
+        Region {
+            item: menu.visible ? menu : null
+        }
     }
 
     // ── Matching windows to apps ─────────────────────────────
@@ -56,7 +65,8 @@ PanelWindow {
 
     // Open windows that belong to a desktop entry
     function windowsFor(entry) {
-        if (!entry) return [];
+        if (!entry)
+            return [];
         const keys = [entry.id, entry.startupClass, entry.name].map(norm).filter(k => k !== "");
         return ToplevelManager.toplevels.values.filter(t => keys.includes(norm(t.appId)));
     }
@@ -73,25 +83,30 @@ PanelWindow {
     readonly property var running: {
         const claimed = new Set();
         for (const e of pinnedEntries)
-            for (const w of windowsFor(e)) claimed.add(w);
+            for (const w of windowsFor(e))
+                claimed.add(w);
 
         const seen = new Set();
         const out = [];
         for (const t of ToplevelManager.toplevels.values) {
             const key = norm(t.appId);
-            if (key === "" || claimed.has(t) || seen.has(key)) continue;
+            if (key === "" || claimed.has(t) || seen.has(key))
+                continue;
             seen.add(key);
-            out.push({ appId: t.appId, entry: DesktopEntries.heuristicLookup(t.appId) });
+            out.push({
+                appId: t.appId,
+                entry: DesktopEntries.heuristicLookup(t.appId)
+            });
         }
 
         const rank = k => {
             const i = runningOrder.indexOf(k);
             return i === -1 ? runningOrder.length : i;
         };
-        return out
-            .map((r, i) => ({ r: r, i: i }))
-            .sort((a, b) => (rank(norm(a.r.appId)) - rank(norm(b.r.appId))) || (a.i - b.i))
-            .map(x => x.r);
+        return out.map((r, i) => ({
+                    r: r,
+                    i: i
+                })).sort((a, b) => (rank(norm(a.r.appId)) - rank(norm(b.r.appId))) || (a.i - b.i)).map(x => x.r);
     }
 
     // ── Drag to reorder ──────────────────────────────────────
@@ -126,7 +141,8 @@ PanelWindow {
     Timer {
         id: previewHide
         interval: 250
-        onTriggered: if (!root.hovered && !previewHover.hovered) root.previewFor = null
+        onTriggered: if (!root.hovered && !previewHover.hovered)
+            root.previewFor = null
     }
 
     // ── Right-click menu ─────────────────────────────────────
@@ -142,7 +158,8 @@ PanelWindow {
         menuFor = null;
         menuGrab.active = false;
     }
-    onShownChanged: if (!shown) closeMenu()
+    onShownChanged: if (!shown)
+        closeMenu()
 
     // Close the menu when clicking anywhere else
     HyprlandFocusGrab {
@@ -163,23 +180,40 @@ PanelWindow {
 
         if (e) {
             for (const a of Array.from(e.actions ?? []))
-                out.push({ icon: "arrow_outward", label: a.name, run: () => a.execute() });
-            out.push({ icon: "add", label: "New window", run: () => e.execute() });
+                out.push({
+                    icon: "arrow_outward",
+                    label: a.name,
+                    run: () => a.execute()
+                });
+            out.push({
+                icon: "add",
+                label: "New window",
+                run: () => e.execute()
+            });
         }
 
         if (it.windows.length >= 2) {
-            out.push({ separator: true });
+            out.push({
+                separator: true
+            });
             for (const w of it.windows)
-                out.push({ icon: "select_window", label: w.title || "Window", run: () => w.activate() });
+                out.push({
+                    icon: "select_window",
+                    label: w.title || "Window",
+                    run: () => w.activate()
+                });
         }
 
-        if (it.windows.length > 0 || e) out.push({ separator: true });
+        if (it.windows.length > 0 || e)
+            out.push({
+                separator: true
+            });
 
         if (it.windows.length > 0) {
             out.push({
                 icon: "close",
                 label: it.windows.length > 1 ? "Close all windows" : "Close window",
-                run: () => it.windows.forEach(w => w.close()),
+                run: () => it.windows.forEach(w => w.close())
             });
         }
         if (e) {
@@ -187,7 +221,7 @@ PanelWindow {
             out.push({
                 icon: isPinned ? "keep_off" : "keep",
                 label: isPinned ? "Unpin" : "Pin to dock",
-                run: () => DockPins.toggle(e.id),
+                run: () => DockPins.toggle(e.id)
             });
         }
         return out;
@@ -202,7 +236,7 @@ PanelWindow {
         property string fallbackIcon: ""   // app id, for apps without a desktop entry
         property int cycle: 0
         readonly property string label: entry?.name ?? fallbackIcon
-        readonly property string tileIcon: root.tileIcons[entry?.id ?? ""] ?? ""
+        readonly property string tileIcon: Config.dock.themedTiles ? (root.tileIcons[entry?.id ?? ""] ?? "") : ""
         readonly property bool running: windows.length > 0
 
         // Reordering
@@ -218,10 +252,13 @@ PanelWindow {
 
         // How far this icon moves aside while another icon is dragged past it
         readonly property real shift: {
-            if (dragging || dropping || root.dragGroup !== group) return 0;
+            if (dragging || dropping || root.dragGroup !== group)
+                return 0;
             const f = root.dragFrom, t = root.dragTo;
-            if (f < t && slot > f && slot <= t) return -root.slotWidth;
-            if (f > t && slot >= t && slot < f) return root.slotWidth;
+            if (f < t && slot > f && slot <= t)
+                return -root.slotWidth;
+            if (f > t && slot >= t && slot < f)
+                return root.slotWidth;
             return 0;
         }
 
@@ -231,7 +268,11 @@ PanelWindow {
         property real shownX: offsetX
         Behavior on shownX {
             enabled: !item.dragging && !item.dropping
-            NumberAnimation { duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.2
+            }
         }
 
         width: 48
@@ -241,7 +282,9 @@ PanelWindow {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
         cursorShape: dragging ? Qt.ClosedHandCursor : Qt.PointingHandCursor
 
-        transform: Translate { x: item.shownX }
+        transform: Translate {
+            x: item.shownX
+        }
 
         onPressed: mouse => {
             pressSceneX = mapToItem(null, mouse.x, 0).x;
@@ -249,7 +292,8 @@ PanelWindow {
         }
 
         onPositionChanged: mouse => {
-            if (!(pressedButtons & Qt.LeftButton) || group === "" || dropping) return;
+            if (!(pressedButtons & Qt.LeftButton) || group === "" || dropping)
+                return;
 
             const dx = mapToItem(null, mouse.x, 0).x - pressSceneX;
 
@@ -264,13 +308,13 @@ PanelWindow {
             }
             if (dragging) {
                 dragDx = dx;
-                root.dragTo = Math.max(0, Math.min(groupCount - 1,
-                    slot + Math.round(dragDx / root.slotWidth)));
+                root.dragTo = Math.max(0, Math.min(groupCount - 1, slot + Math.round(dragDx / root.slotWidth)));
             }
         }
 
         onReleased: {
-            if (!dragging) return;
+            if (!dragging)
+                return;
             // Glide from the mouse position into the target slot...
             dropX = dragDx;
             dropping = true;
@@ -299,24 +343,29 @@ PanelWindow {
             root.dragFrom = -1;
             root.dragTo = -1;
             if (from !== to) {
-                if (g === "pinned") root.movePinned(from, to);
-                else root.moveRunning(from, to);
+                if (g === "pinned")
+                    root.movePinned(from, to);
+                else
+                    root.moveRunning(from, to);
             }
         }
 
         onContainsMouseChanged: {
-            if (dragging || dropping) return;
+            if (dragging || dropping)
+                return;
             if (containsMouse) {
                 root.hovered = item;
                 root.previewFor = (windows.length >= 2 && root.menuFor === null) ? item : null;
             } else {
-                if (root.hovered === item) root.hovered = null;
+                if (root.hovered === item)
+                    root.hovered = null;
                 previewHide.restart();
             }
         }
 
         onClicked: mouse => {
-            if (wasDragged) return;  // a drag isn't a click
+            if (wasDragged)
+                return;  // a drag isn't a click
             if (mouse.button === Qt.RightButton) {
                 root.openMenu(item);
                 return;
@@ -339,7 +388,11 @@ PanelWindow {
             radius: 14
             color: Theme.colors.surfaceContainerHigh
             opacity: item.containsMouse && !item.dragging && !item.dropping ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                }
+            }
         }
 
         // Themed tile
@@ -352,8 +405,17 @@ PanelWindow {
             radius: 12
             color: item.running ? Theme.colors.primary : Theme.colors.surfaceContainerHigh
             scale: item.dragging || item.dropping ? 1.12 : item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
-            Behavior on color { ColorAnimation { duration: 200 } }
-            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            Behavior on color {
+                ColorAnimation {
+                    duration: 200
+                }
+            }
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             readonly property color glyphColor: item.running ? Theme.colors.primaryText : Theme.colors.text
 
@@ -378,7 +440,9 @@ PanelWindow {
                 mipmap: true
 
                 layer.enabled: true
-                layer.effect: ColorOverlay { color: tile.glyphColor }
+                layer.effect: ColorOverlay {
+                    color: tile.glyphColor
+                }
             }
         }
 
@@ -389,12 +453,21 @@ PanelWindow {
             implicitSize: 36
             source: Quickshell.iconPath(item.entry?.icon || item.fallbackIcon)
             scale: item.dragging || item.dropping ? 1.12 : item.pressed ? 0.9 : (item.containsMouse ? 1.08 : 1)
-            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutCubic
+                }
+            }
         }
 
         // Running indicator: one dot per window, up to three
         Row {
-            anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: -4 }
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                bottom: parent.bottom
+                bottomMargin: -4
+            }
             spacing: 3
 
             Repeater {
@@ -410,9 +483,12 @@ PanelWindow {
 
         // Tooltip with the app's name (not while dragging, previews or the menu are showing)
         Rectangle {
-            visible: item.containsMouse && !item.dragging && !item.dropping && item.label !== ""
-                && root.previewFor !== item && root.menuFor !== item
-            anchors { bottom: parent.top; bottomMargin: 14; horizontalCenter: parent.horizontalCenter }
+            visible: item.containsMouse && !item.dragging && !item.dropping && item.label !== "" && root.previewFor !== item && root.menuFor !== item
+            anchors {
+                bottom: parent.top
+                bottomMargin: 14
+                horizontalCenter: parent.horizontalCenter
+            }
             width: tip.implicitWidth + 16
             height: 24
             radius: 8
@@ -441,7 +517,12 @@ PanelWindow {
 
         // Flush against the frame when shown; slides down into it when hidden
         y: root.shown ? parent.height - height : parent.height
-        Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+        Behavior on y {
+            NumberAnimation {
+                duration: 320
+                easing.type: Easing.OutCubic
+            }
+        }
 
         FramePanel {
             anchors.fill: parent
@@ -469,7 +550,11 @@ PanelWindow {
                     radius: 14
                     color: Theme.colors.surfaceContainerHigh
                     opacity: launcherButton.containsMouse ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 150
+                        }
+                    }
                 }
                 Icon {
                     anchors.centerIn: parent
@@ -477,7 +562,12 @@ PanelWindow {
                     font.pixelSize: 28
                     color: Theme.colors.primary
                     scale: launcherButton.pressed ? 0.9 : (launcherButton.containsMouse ? 1.08 : 1)
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 150
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
             }
 
@@ -506,7 +596,7 @@ PanelWindow {
 
             // Running apps that aren't pinned
             Rectangle {
-                visible: root.running.length > 0
+                visible: Config.dock.showRunning && root.running.length > 0
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
                 height: 32
@@ -514,7 +604,7 @@ PanelWindow {
             }
 
             Repeater {
-                model: root.running
+                model: Config.dock.showRunning ? root.running : []
                 delegate: DockItem {
                     required property var modelData
                     required property int index
@@ -562,7 +652,11 @@ PanelWindow {
                     radius: 14
                     color: Theme.colors.surfaceContainerHigh
                     opacity: mem.containsMouse ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 150
+                        }
+                    }
                 }
 
                 Canvas {
@@ -571,7 +665,8 @@ PanelWindow {
                     width: 38
                     height: 38
                     antialiasing: true
-                    onAvailableChanged: if (available) requestPaint()
+                    onAvailableChanged: if (available)
+                        requestPaint()
 
                     onPaint: {
                         const ctx = getContext("2d");
@@ -609,7 +704,11 @@ PanelWindow {
                 // Tooltip with the exact numbers
                 Rectangle {
                     visible: mem.containsMouse
-                    anchors { bottom: parent.top; bottomMargin: 14; horizontalCenter: parent.horizontalCenter }
+                    anchors {
+                        bottom: parent.top
+                        bottomMargin: 14
+                        horizontalCenter: parent.horizontalCenter
+                    }
                     width: memTip.implicitWidth + 16
                     height: 24
                     radius: 8
@@ -620,8 +719,7 @@ PanelWindow {
                     Text {
                         id: memTip
                         anchors.centerIn: parent
-                        text: "Memory  ·  " + SystemStats.gib(SystemStats.memUsed)
-                            + " / " + SystemStats.gib(SystemStats.memTotal) + " GB"
+                        text: "Memory  ·  " + SystemStats.gib(SystemStats.memUsed) + " / " + SystemStats.gib(SystemStats.memTotal) + " GB"
                         color: Theme.colors.text
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize.small
@@ -646,13 +744,13 @@ PanelWindow {
         border.color: Theme.colors.outlineVariant
 
         // Centred above the hovered icon, kept on screen
-        x: target ? Math.max(8, Math.min(root.width - width - 8,
-                target.mapToItem(null, target.width / 2, 0).x - width / 2)) : 0
+        x: target ? Math.max(8, Math.min(root.width - width - 8, target.mapToItem(null, target.width / 2, 0).x - width / 2)) : 0
         y: dock.y - height - 10
 
         HoverHandler {
             id: previewHover
-            onHoveredChanged: if (!hovered) previewHide.restart()
+            onHoveredChanged: if (!hovered)
+                previewHide.restart()
         }
 
         Row {
@@ -681,12 +779,20 @@ PanelWindow {
                         radius: 10
                         color: Theme.colors.surfaceContainerHigh
                         opacity: pv.containsMouse ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 120 } }
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: 120
+                            }
+                        }
                     }
 
                     ScreencopyView {
                         id: shot
-                        anchors { top: parent.top; topMargin: 6; horizontalCenter: parent.horizontalCenter }
+                        anchors {
+                            top: parent.top
+                            topMargin: 6
+                            horizontalCenter: parent.horizontalCenter
+                        }
                         captureSource: pv.modelData
                         live: true
                         constraintSize: Qt.size(208, 130)
@@ -695,9 +801,12 @@ PanelWindow {
                     Text {
                         id: title
                         anchors {
-                            top: shot.bottom; topMargin: 4
-                            left: parent.left; leftMargin: 8
-                            right: parent.right; rightMargin: 8
+                            top: shot.bottom
+                            topMargin: 4
+                            left: parent.left
+                            leftMargin: 8
+                            right: parent.right
+                            rightMargin: 8
                         }
                         text: pv.modelData.title
                         elide: Text.ElideRight
@@ -729,13 +838,15 @@ PanelWindow {
         border.color: Theme.colors.outlineVariant
 
         // Centred above the icon, kept on screen
-        x: target ? Math.max(8, Math.min(root.width - width - 8,
-                target.mapToItem(null, target.width / 2, 0).x - width / 2)) : 0
+        x: target ? Math.max(8, Math.min(root.width - width - 8, target.mapToItem(null, target.width / 2, 0).x - width / 2)) : 0
         y: dock.y - height - 10
 
         // Scrolls when the menu has more entries than fit
         Flickable {
-            anchors { fill: parent; margins: 8 }
+            anchors {
+                fill: parent
+                margins: 8
+            }
             contentHeight: menuCol.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds

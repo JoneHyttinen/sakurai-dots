@@ -178,6 +178,7 @@ FloatingWindow {
 
                 AppearancePage {}
                 NotificationSettingsPage {}
+                DockSettingsPage {}
 
                 // Placeholders until those tabs are built
                 Repeater {
