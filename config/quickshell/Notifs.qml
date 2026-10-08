@@ -25,13 +25,17 @@ Singleton {
 
     function ago(n) {
         const t = receivedAt[n.id];
-        if (!t) return "";
+        if (!t)
+            return "";
         const s = Math.floor((now - t) / 1000);
-        if (s < 60) return "now";
+        if (s < 60)
+            return "now";
         const m = Math.floor(s / 60);
-        if (m < 60) return m + "m";
+        if (m < 60)
+            return m + "m";
         const h = Math.floor(m / 60);
-        if (h < 24) return h + "h";
+        if (h < 24)
+            return h + "h";
         return Math.floor(h / 24) + "d";
     }
 
@@ -42,12 +46,16 @@ Singleton {
     // Everything received this session; for the history sidebar later
     readonly property var history: server.trackedNotifications
 
-    readonly property int timeout: 5000
-    readonly property int maxPopups: 5
+    readonly property int timeout: Config.notifications.timeout * 1000
+    readonly property int maxPopups: Config.notifications.maxPopups
 
     function add(n) {
-        const critical = n.urgency === NotificationUrgency.Critical;
-        const entry = { n: n, until: critical ? Infinity : Date.now() + timeout, critical: critical };
+        const critical = n.urgency === NotificationUrgency.Critical && Config.notifications.keepCritical;
+        const entry = {
+            n: n,
+            until: critical ? Infinity : Date.now() + timeout,
+            critical: critical
+        };
         popups = [entry].concat(popups).slice(0, maxPopups);
     }
 
@@ -58,7 +66,8 @@ Singleton {
     // Pause the countdown while hovered; resume with a little extra time
     function hold(n, held) {
         const p = popups.find(p => p.n === n);
-        if (!p || p.critical) return;
+        if (!p || p.critical)
+            return;
         p.until = held ? Infinity : Date.now() + 3000;
     }
 
@@ -69,7 +78,8 @@ Singleton {
         onTriggered: {
             const now = Date.now();
             const kept = root.popups.filter(p => p.until > now);
-            if (kept.length !== root.popups.length) root.popups = kept;
+            if (kept.length !== root.popups.length)
+                root.popups = kept;
         }
     }
 

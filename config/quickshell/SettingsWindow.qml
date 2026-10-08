@@ -177,10 +177,11 @@ FloatingWindow {
                 currentIndex: win.page
 
                 AppearancePage {}
+                NotificationSettingsPage {}
 
                 // Placeholders until those tabs are built
                 Repeater {
-                    model: win.pages.length - 1
+                    model: win.pages.length - 2
                     delegate: Item {
                         implicitHeight: 120
                         Text {

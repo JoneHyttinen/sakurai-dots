@@ -7,6 +7,7 @@ import Quickshell.Io
 Singleton {
     id: root
     property alias appearance: adapter.appearance
+    property alias notifications: adapter.notifications
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/quickshell/settings.json"
@@ -29,6 +30,13 @@ Singleton {
                 property int frameTop: 40
                 property int frameSide: 8
                 property int frameRadius: 20
+            }
+
+            property JsonObject notifications: JsonObject {
+                property int timeout: 5          // seconds
+                property int maxPopups: 5
+                property string screen: "primary" // "primary" or "focused"
+                property bool keepCritical: true
             }
         }
     }

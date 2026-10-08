@@ -6,5 +6,11 @@
         "frameSide": 8,
         "frameTop": 45,
         "radius": 12
+    },
+    "notifications": {
+        "keepCritical": true,
+        "maxPopups": 4,
+        "screen": "primary",
+        "timeout": 5
     }
 }
