@@ -47,3 +47,7 @@ output_path = '~/.config/vesktop/themes/matugen.theme.css'
 [templates.spicetify]
 input_path = '~/.config/matugen/templates/spicetify.ini'
 output_path = '~/.config/spicetify/Themes/Matugen/color.ini'
+
+[templates.fastfetch]
+input_path = '~/.config/matugen/templates/fastfetch.jsonc'
+output_path = '~/.config/fastfetch/config.jsonc'
