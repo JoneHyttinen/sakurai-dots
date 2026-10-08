@@ -13,19 +13,21 @@ hl.config({
 		rounding = 12, -- matches Theme.radius in Quickshell
 		rounding_power = 2,
 		dim_special = 0.3,
-		active_opacity = 1.0,
-		inactive_opacity = 0.92,
+		active_opacity = 0.9,
+		inactive_opacity = 0.86,
 		fullscreen_opacity = 1,
+
 		shadow = {
 			enabled = true,
 			range = 20,
 			render_power = 3,
 			color = "rgba(0000004d)",
 		},
+
 		blur = {
 			size = 6,
-			passes = 3,
-			noise = 0.02,
+			passes = 1,
+			noise = 0.03,
 			vibrancy = 0.2,
 			special = true,
 		},

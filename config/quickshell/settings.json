@@ -1,0 +1,10 @@
+{
+    "appearance": {
+        "font": "GeistMono NF",
+        "fontScale": 1.15,
+        "frameRadius": 15,
+        "frameSide": 8,
+        "frameTop": 45,
+        "radius": 12
+    }
+}

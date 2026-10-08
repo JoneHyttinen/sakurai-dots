@@ -144,6 +144,9 @@ hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 -- Sidebar
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs ipc call dashboard toggle"))
 
+-- Settings
+hl.bind(mainMod .. " + comma", hl.dsp.exec_cmd("qs ipc call settings toggle"))
+
 -------------------------------
 ---- WORKSPACES & MONITORS ----
 -------------------------------

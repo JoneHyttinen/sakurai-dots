@@ -3,20 +3,29 @@ import Quickshell.Hyprland
 import Quickshell.Io
 
 ShellRoot {
-    Launcher { id: appLauncher }
+    Launcher {
+        id: appLauncher
+    }
+    SettingsWindow {}
     ClipboardPicker {}
-    WallpaperPicker { id: appWallpaperPicker }
+    WallpaperPicker {
+        id: appWallpaperPicker
+    }
     NotificationPopups {}
     OSD {}
 
     IpcHandler {
         target: "dock"
-        function toggle(): void { Panels.dockForced = !Panels.dockForced }
+        function toggle(): void {
+            Panels.dockForced = !Panels.dockForced;
+        }
     }
 
     IpcHandler {
         target: "dashboard"
-        function toggle(): void { Panels.dashboardToggle(Hyprland.focusedMonitor?.name ?? "") }
+        function toggle(): void {
+            Panels.dashboardToggle(Hyprland.focusedMonitor?.name ?? "");
+        }
     }
 
     Variants {
@@ -25,10 +34,14 @@ ShellRoot {
     }
     Variants {
         model: Quickshell.screens
-        Bar { wallpaperPicker: appWallpaperPicker }
+        Bar {
+            wallpaperPicker: appWallpaperPicker
+        }
     }
     Variants {
         model: Quickshell.screens
-        Dock { launcher: appLauncher }
+        Dock {
+            launcher: appLauncher
+        }
     }
 }

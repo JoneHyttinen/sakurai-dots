@@ -6,24 +6,23 @@ import Quickshell.Io
 Singleton {
     id: root
     property alias colors: palette
-    readonly property int radius: 12
-    readonly property string font: "Geist"
 
-    readonly property QtObject frame: QtObject {
-        readonly property int top: 40     // the bar's height; the top band of the frame
-        readonly property int side: 8     // left, right and bottom bands
-        readonly property int radius: 20  // inner corners of the frame
-    }
-
-    // Change this one number to scale all UI text
-    readonly property real fontScale: 1.25
+    readonly property int radius: Config.appearance.radius
+    readonly property string font: Config.appearance.font
+    readonly property real fontScale: Config.appearance.fontScale
 
     readonly property QtObject fontSize: QtObject {
-        readonly property int tiny:   Math.round(11 * root.fontScale)
-        readonly property int small:  Math.round(12 * root.fontScale)
-        readonly property int body:   Math.round(13 * root.fontScale)
+        readonly property int tiny: Math.round(11 * root.fontScale)
+        readonly property int small: Math.round(12 * root.fontScale)
+        readonly property int body: Math.round(13 * root.fontScale)
         readonly property int medium: Math.round(14 * root.fontScale)
-        readonly property int large:  Math.round(15 * root.fontScale)
+        readonly property int large: Math.round(15 * root.fontScale)
+    }
+
+    readonly property QtObject frame: QtObject {
+        readonly property int top: Config.appearance.frameTop
+        readonly property int side: Config.appearance.frameSide
+        readonly property int radius: Config.appearance.frameRadius
     }
 
     FileView {
@@ -46,17 +45,14 @@ Singleton {
             property string outline: "#8e9099"
             property string outlineVariant: "#44474e"
         }
-  }
+    }
 
     // Light/dark mode, as last applied by setwall
     readonly property bool dark: themeInfo.mode !== "light"
 
     function toggleMode() {
         const next = dark ? "light" : "dark";
-        Quickshell.execDetached(["sh", "-c",
-            'mkdir -p "$HOME/.local/state" && printf %s "$1" > "$HOME/.local/state/theme-mode" '
-            + '&& "$HOME/.local/bin/setwall" "$HOME/.cache/wallpaper" "$2"',
-            "sh", next, themeInfo.color]);
+        Quickshell.execDetached(["sh", "-c", 'mkdir -p "$HOME/.local/state" && printf %s "$1" > "$HOME/.local/state/theme-mode" ' + '&& "$HOME/.local/bin/setwall" "$HOME/.cache/wallpaper" "$2"', "sh", next, themeInfo.color]);
     }
 
     FileView {
