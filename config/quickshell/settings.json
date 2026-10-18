@@ -1,11 +1,26 @@
 {
     "appearance": {
-        "font": "GeistMono NF",
-        "fontScale": 1.15,
+        "font": "JetBrains Mono",
+        "fontScale": 1.1,
         "frameRadius": 15,
         "frameSide": 8,
         "frameTop": 45,
         "radius": 12
+    },
+    "bar": {
+        "dateFormat": "ddd d MMM",
+        "showBattery": false,
+        "showDashboardButton": true,
+        "showDate": true,
+        "showGaming": true,
+        "showNetwork": true,
+        "showNotifications": true,
+        "showScratchpad": true,
+        "showSeconds": false,
+        "showTray": true,
+        "showVolume": true,
+        "timeFormat": "24h",
+        "workspaceStyle": "numbers"
     },
     "dock": {
         "mode": "empty",

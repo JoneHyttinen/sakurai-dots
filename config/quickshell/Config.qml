@@ -9,6 +9,7 @@ Singleton {
     property alias appearance: adapter.appearance
     property alias notifications: adapter.notifications
     property alias dock: adapter.dock
+    property alias bar: adapter.bar
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/quickshell/settings.json"
@@ -45,6 +46,22 @@ Singleton {
                 property bool showRunning: true
                 property bool showMemory: true
                 property bool themedTiles: true
+            }
+
+            property JsonObject bar: JsonObject {
+                property string timeFormat: "24h"       // "24h" or "12h"
+                property bool showSeconds: false
+                property bool showDate: true
+                property string dateFormat: "ddd d MMM"
+                property string workspaceStyle: "numbers" // "numbers" or "dots"
+                property bool showGaming: true
+                property bool showScratchpad: true
+                property bool showTray: true
+                property bool showVolume: true
+                property bool showNetwork: true
+                property bool showNotifications: true
+                property bool showBattery: true
+                property bool showDashboardButton: true
             }
         }
     }

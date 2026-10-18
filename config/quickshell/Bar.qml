@@ -12,11 +12,24 @@ PanelWindow {
 
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
 
-    anchors { top: true; left: true; right: true }
+    anchors {
+        top: true
+        left: true
+        right: true
+    }
     implicitHeight: Theme.frame.top
     color: "transparent"  // the frame draws the bar's background
 
-    SystemClock { id: clock; precision: SystemClock.Minutes }
+    // ── Clock ────────────────────────────────────────────
+    SystemClock {
+        id: clock
+        precision: Config.bar.showSeconds ? SystemClock.Seconds : SystemClock.Minutes
+    }
+
+    readonly property string clockText: {
+        const time = Qt.formatDateTime(clock.date, Config.bar.timeFormat === "12h" ? (Config.bar.showSeconds ? "h:mm:ss AP" : "h:mm AP") : (Config.bar.showSeconds ? "HH:mm:ss" : "HH:mm"));
+        return Config.bar.showDate ? Qt.formatDateTime(clock.date, Config.bar.dateFormat) + "   " + time : time;
+    }
 
     // "Keep awake" toggle in the dashboard
     IdleInhibitor {
@@ -29,28 +42,35 @@ PanelWindow {
     Connections {
         target: Hyprland
         function onRawEvent(event) {
-            if (event.name === "activespecial") Hyprland.refreshMonitors();
+            if (event.name === "activespecial")
+                Hyprland.refreshMonitors();
         }
     }
 
-    readonly property bool scratchpadOpen:
-        monitor?.lastIpcObject?.specialWorkspace?.name === "special:special"
+    readonly property bool scratchpadOpen: monitor?.lastIpcObject?.specialWorkspace?.name === "special:special"
 
     // The dashboard keybind opens the dashboard on the focused monitor's bar
     Connections {
         target: Panels
         function onDashboardToggle(screenName) {
-            if (screenName === bar.screen?.name) dashboard.toggle();
+            if (screenName === bar.screen?.name)
+                dashboard.toggle();
         }
     }
 
     Item {
         anchors.fill: parent
-        anchors { leftMargin: Theme.frame.side + 4; rightMargin: Theme.frame.side + 4 }
+        anchors {
+            leftMargin: Theme.frame.side + 4
+            rightMargin: Theme.frame.side + 4
+        }
 
         // ── Workspaces ───────────────────────────────────
         BarChip {
-            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
             padding: 6
             spacing: 4
 
@@ -62,6 +82,7 @@ PanelWindow {
                 readonly property bool focused: wsObj !== null && Hyprland.focusedWorkspace?.id === wsObj.id
                 readonly property bool occupied: (wsObj?.toplevels.values.length ?? 0) > 0
 
+                visible: Config.bar.showGaming
                 anchors.verticalCenter: parent.verticalCenter
                 width: active ? 36 : 26
                 height: 22
@@ -69,36 +90,42 @@ PanelWindow {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.focus({ workspace = "name:gaming" })'])
 
-                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 220
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
                 Rectangle {
                     anchors.fill: parent
                     radius: height / 2
-                    color: games.active ? Theme.colors.primary
-                        : games.containsMouse ? Theme.colors.surfaceContainer
-                        : "transparent"
+                    color: games.active ? Theme.colors.primary : games.containsMouse ? Theme.colors.surfaceContainer : "transparent"
                     opacity: games.active && !games.focused ? 0.6 : 1
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 180
+                        }
+                    }
                 }
 
                 Icon {
                     anchors.centerIn: parent
                     name: "sports_esports"
                     font.pixelSize: 16
-                    color: games.active ? Theme.colors.primaryText
-                        : games.occupied ? Theme.colors.text
-                        : Theme.colors.outline
+                    color: games.active ? Theme.colors.primaryText : games.occupied ? Theme.colors.text : Theme.colors.outline
                 }
             }
 
             Rectangle {
+                visible: Config.bar.showGaming
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
                 height: 14
                 color: Theme.colors.outlineVariant
             }
 
-            // Numbered workspaces on this monitor
+            // Numbered workspaces (or dots) on this monitor
             Repeater {
                 model: Hyprland.workspaces
                 delegate: MouseArea {
@@ -109,34 +136,41 @@ PanelWindow {
                     // The one with keyboard focus, across all monitors
                     readonly property bool focused: Hyprland.focusedWorkspace?.id === modelData.id
                     readonly property bool occupied: modelData.toplevels.values.length > 0
+                    readonly property bool dots: Config.bar.workspaceStyle === "dots"
 
                     // Only this monitor's regular (non-special) workspaces
                     visible: modelData.id > 0 && modelData.monitor?.name === bar.screen?.name
                     anchors.verticalCenter: parent.verticalCenter
-                    width: active ? 36 : 22
-                    height: 22
+                    width: dots ? (active ? 26 : 10) : (active ? 36 : 22)
+                    height: dots ? 10 : 22
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: modelData.activate()
 
-                    Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 220
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
                     Rectangle {
                         anchors.fill: parent
                         radius: height / 2
-                        color: ws.active ? Theme.colors.primary
-                            : ws.containsMouse ? Theme.colors.surfaceContainer
-                            : "transparent"
+                        color: ws.active ? Theme.colors.primary : ws.dots ? (ws.occupied ? Theme.colors.outline : Theme.colors.outlineVariant) : ws.containsMouse ? Theme.colors.surfaceContainer : "transparent"
                         opacity: ws.active && !ws.focused ? 0.6 : 1
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 180
+                            }
+                        }
                     }
 
                     Text {
+                        visible: !ws.dots
                         anchors.centerIn: parent
                         text: ws.modelData.id
-                        color: ws.active ? Theme.colors.primaryText
-                            : ws.occupied ? Theme.colors.text
-                            : Theme.colors.outline
+                        color: ws.active ? Theme.colors.primaryText : ws.occupied ? Theme.colors.text : Theme.colors.outline
                         font.family: Theme.font
                         font.pixelSize: Theme.fontSize.small
                         font.weight: ws.active ? Font.Bold : Font.Medium
@@ -145,6 +179,7 @@ PanelWindow {
             }
 
             Rectangle {
+                visible: Config.bar.showScratchpad
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
                 height: 14
@@ -158,6 +193,7 @@ PanelWindow {
                 readonly property bool open: bar.scratchpadOpen
                 readonly property bool occupied: (wsObj?.toplevels.values.length ?? 0) > 0
 
+                visible: Config.bar.showScratchpad
                 anchors.verticalCenter: parent.verticalCenter
                 width: open ? 36 : 26
                 height: 22
@@ -165,24 +201,29 @@ PanelWindow {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.workspace.toggle_special()"])
 
-                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 220
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
                 Rectangle {
                     anchors.fill: parent
                     radius: height / 2
-                    color: scratch.open ? Theme.colors.primary
-                        : scratch.containsMouse ? Theme.colors.surfaceContainer
-                        : "transparent"
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    color: scratch.open ? Theme.colors.primary : scratch.containsMouse ? Theme.colors.surfaceContainer : "transparent"
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 180
+                        }
+                    }
                 }
 
                 Icon {
                     anchors.centerIn: parent
                     name: "layers"
                     font.pixelSize: 16
-                    color: scratch.open ? Theme.colors.primaryText
-                        : scratch.occupied ? Theme.colors.text
-                        : Theme.colors.outline
+                    color: scratch.open ? Theme.colors.primaryText : scratch.occupied ? Theme.colors.text : Theme.colors.outline
                 }
             }
         }
@@ -201,7 +242,7 @@ PanelWindow {
 
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Qt.formatDateTime(clock.date, "ddd d MMM   HH:mm")
+                    text: bar.clockText
                     color: dashboard.shown ? Theme.colors.primary : Theme.colors.text
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSize.body
@@ -219,25 +260,46 @@ PanelWindow {
 
         // ── Right side ───────────────────────────────────
         Row {
-            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
             spacing: 6
 
             BarChip {
-                visible: SystemTray.items.values.length > 0
+                visible: Config.bar.showTray && SystemTray.items.values.length > 0
                 padding: 8
-                Tray { anchors.verticalCenter: parent.verticalCenter }
+                Tray {
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
 
             BarChip {
+                // Hide the whole chip when everything in it is turned off
+                visible: Config.bar.showBattery || Config.bar.showVolume || Config.bar.showNetwork || Config.bar.showNotifications
                 spacing: 14
-                Volume { anchors.verticalCenter: parent.verticalCenter }
-                Network { anchors.verticalCenter: parent.verticalCenter }
-                Battery { anchors.verticalCenter: parent.verticalCenter }
-                NotifButton { anchors.verticalCenter: parent.verticalCenter }
+
+                Battery {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Config.bar.showBattery && present
+                }
+                Volume {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Config.bar.showVolume
+                }
+                Network {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Config.bar.showNetwork
+                }
+                NotifButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Config.bar.showNotifications
+                }
             }
 
             // Dashboard button
             MouseArea {
+                visible: Config.bar.showDashboardButton
                 anchors.verticalCenter: parent.verticalCenter
                 width: tuneChip.width
                 height: tuneChip.height
