@@ -13,8 +13,8 @@ hl.config({
 		rounding = 12, -- matches Theme.radius in Quickshell
 		rounding_power = 2,
 		dim_special = 0.3,
-		active_opacity = 0.92,
-		inactive_opacity = 0.86,
+		active_opacity = 0.85,
+		inactive_opacity = 0.8,
 		fullscreen_opacity = 1,
 
 		shadow = {

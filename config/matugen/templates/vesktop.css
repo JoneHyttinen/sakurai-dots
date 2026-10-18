@@ -33,6 +33,13 @@
   --header-secondary: {{colors.on_surface_variant.default.hex}};
   --text-link: {{colors.primary.default.hex}};
 
+  /* Text in the redesigned interface: names, input, profile */
+  --text-strong: {{colors.on_surface.default.hex}};
+  --text-subtle: {{colors.on_surface_variant.default.hex}};
+  --text-secondary: {{colors.on_surface_variant.default.hex}};
+  --text-tertiary: {{colors.outline.default.hex}};
+  --input-background: {{colors.surface_container_high.default.hex}};
+
   /* ── Icons and channel names ── */
   --interactive-normal: {{colors.on_surface_variant.default.hex}};
   --interactive-hover: {{colors.on_surface.default.hex}};

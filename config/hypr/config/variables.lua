@@ -7,7 +7,7 @@ PRIMARY_MONITOR = MONITOR1
 TERMINAL = "alacritty"
 FILE_MANAGER = "dolphin"
 EDITOR = "nvim"
-CALCULATOR = "gnome.calculator"
+CALCULATOR = "org.gnome.Calculator.desktop"
 BROWSER = "firefox"
 
 NUM_WPM = 6
