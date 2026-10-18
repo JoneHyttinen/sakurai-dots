@@ -1,3 +1,7 @@
+![example-desktop](./pictures/desktop-quickshell.png)
+
+---
+
 # sakurai-dots
 
 Personal dotfiles and system configuration for my Linux machines, managed with Nix Flakes and Home Manager.
