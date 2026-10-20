@@ -24,6 +24,7 @@ in
     "quickshell".source = link "quickshell";
     "nvim".source = link "nvim";
     "fetch".source = link "fetch";
+    "fish".source = link "fish";
   };
 
   # setwall lives in the repo; this puts it on your PATH

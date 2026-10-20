@@ -30,6 +30,15 @@ in
       adw-gtk3
       dconf
 
+      # fish: the same prompt and plugins as on CachyOS
+      fishPlugins.pure       # the ❯ prompt with git status and command time
+      fishPlugins.autopair   # closes brackets and quotes
+      fishPlugins.done       # notification when a long command finishes
+      # Tools CachyOS's aliases and functions use
+      eza
+      zoxide
+      fzf
+
       # setwall on the PATH; runs the script straight from the repo
       (writeShellScriptBin "setwall" ''
         exec ${config.home.homeDirectory}/dotfiles/config/hypr/scripts/setwall "$@"
