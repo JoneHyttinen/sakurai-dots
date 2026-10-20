@@ -1,0 +1,50 @@
+{
+    "appearance": {
+        "font": "Geist",
+        "fontScale": 1.25,
+        "frameRadius": 20,
+        "frameSide": 8,
+        "frameTop": 40,
+        "radius": 12
+    },
+    "bar": {
+        "dateFormat": "ddd d MMM",
+        "showBattery": true,
+        "showDashboardButton": true,
+        "showDate": true,
+        "showGaming": true,
+        "showNetwork": true,
+        "showNotifications": true,
+        "showScratchpad": true,
+        "showSeconds": false,
+        "showTray": true,
+        "showVolume": true,
+        "timeFormat": "24h",
+        "workspaceStyle": "numbers"
+    },
+    "dock": {
+        "mode": "empty",
+        "showMemory": true,
+        "showRunning": true,
+        "themedTiles": true
+    },
+    "notifications": {
+        "keepCritical": true,
+        "maxPopups": 5,
+        "screen": "primary",
+        "timeout": 5
+    },
+    "performance": {
+        "mediaBlur": false,
+        "statsInterval": 2000,
+        "visualizer": false,
+        "windowPreviews": false
+    },
+    "wallpaper": {
+        "folder": "",
+        "monoThreshold": 0.08,
+        "scheme": "auto",
+        "transition": "grow",
+        "transitionDuration": 1
+    }
+}

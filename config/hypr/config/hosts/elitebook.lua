@@ -42,10 +42,8 @@ hl.config({
 	decoration = {
 		blur = { enabled = false }, -- the most expensive effect
 		shadow = { enabled = false },
-		inactive_opacity = 1.0, -- see-through windows need blur to look right anyway
-	},
-	misc = {
-		vfr = true, -- only redraw the screen when something changes
+		inactive_opacity = 0.9, -- see-through windows need blur to look right anyway
+		active_opacity = 0.95,
 	},
 })
 
