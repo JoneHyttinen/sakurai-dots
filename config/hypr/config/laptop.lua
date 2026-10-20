@@ -18,7 +18,7 @@ hl.config({
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
 -- Laptop panel
-hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.33 })
+hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.25 })
 
 -- Brightness keys: repeat while held, work on the lock screen
 local brightness = { repeating = true, locked = true, description = "Brightness" }
