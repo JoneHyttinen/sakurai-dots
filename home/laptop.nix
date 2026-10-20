@@ -99,6 +99,7 @@ in
       unblob
       ffuf
       seclists
+      wireshark
   ];
 
   fonts.fontconfig.enable = true;

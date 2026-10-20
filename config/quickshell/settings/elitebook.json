@@ -1,10 +1,10 @@
 {
     "appearance": {
         "font": "Geist",
-        "fontScale": 1.25,
-        "frameRadius": 20,
+        "fontScale": 1.15,
+        "frameRadius": 18,
         "frameSide": 8,
-        "frameTop": 40,
+        "frameTop": 35,
         "radius": 12
     },
     "bar": {
@@ -12,7 +12,7 @@
         "showBattery": true,
         "showDashboardButton": true,
         "showDate": true,
-        "showGaming": true,
+        "showGaming": false,
         "showNetwork": true,
         "showNotifications": true,
         "showScratchpad": true,
@@ -20,7 +20,7 @@
         "showTray": true,
         "showVolume": true,
         "timeFormat": "24h",
-        "workspaceStyle": "numbers"
+        "workspaceStyle": "dots"
     },
     "dock": {
         "mode": "empty",

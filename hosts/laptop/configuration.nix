@@ -99,6 +99,8 @@
 
   programs.solaar.enable = true;
 
+  programs.wireshark.enable = true;
+
   # Bluetooth GUI
   services.blueman.enable = true;
 
