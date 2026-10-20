@@ -71,9 +71,6 @@
   programs.fish.enable = true;
   users.users.sakurai.shell = pkgs.fish;
 
-  # ssh-agent, like the systemd user service on CachyOS
-  programs.ssh.startAgent = true;
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
