@@ -10,6 +10,7 @@ Singleton {
     property alias notifications: adapter.notifications
     property alias dock: adapter.dock
     property alias bar: adapter.bar
+    property alias wallpaper: adapter.wallpaper
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/quickshell/settings.json"
@@ -62,6 +63,14 @@ Singleton {
                 property bool showNotifications: true
                 property bool showBattery: true
                 property bool showDashboardButton: true
+            }
+
+            property JsonObject wallpaper: JsonObject {
+                property string folder: ""            // empty = ~/Pictures/Wallpapers
+                property string transition: "grow"
+                property real transitionDuration: 1.0  // seconds
+                property string scheme: "auto"         // "auto" or a matugen scheme name
+                property real monoThreshold: 0.08      // below this, a wallpaper counts as black and white
             }
         }
     }

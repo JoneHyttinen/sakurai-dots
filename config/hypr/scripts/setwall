@@ -8,6 +8,19 @@ set -euo pipefail
 wall="$(realpath "$1")"
 source_color="${2:-}"
 
+# ── Settings from the settings window (settings.json) ────
+settings="$HOME/.config/quickshell/settings.json"
+cfg() { jq -r "$1 // empty" "$settings" 2>/dev/null || true; }
+
+transition=$(cfg '.wallpaper.transition')
+transition=${transition:-grow}
+duration=$(cfg '.wallpaper.transitionDuration')
+duration=${duration:-1}
+threshold=$(cfg '.wallpaper.monoThreshold')
+threshold=${threshold:-0.08}
+scheme_pref=$(cfg '.wallpaper.scheme')
+scheme_pref=${scheme_pref:-auto}
+
 # ── Wallpaper ────────────────────────────────────────────
 if ! pgrep -x awww-daemon >/dev/null; then
   awww-daemon >/dev/null 2>&1 &
@@ -15,7 +28,7 @@ if ! pgrep -x awww-daemon >/dev/null; then
   sleep 0.5
 fi
 
-awww img "$wall" --transition-type grow --transition-duration 1
+awww img "$wall" --transition-type "$transition" --transition-duration "$duration"
 ln -sf "$wall" "$HOME/.cache/wallpaper" # used by hyprlock and the picker
 
 # ── Scheme and mode ──────────────────────────────────────
@@ -25,13 +38,21 @@ lum=$(magick "$wall" -resize 256x256 -colorspace Gray -format "%[fx:mean]" info:
 
 type="scheme-tonal-spot"
 mode="dark"
-if awk "BEGIN { exit !($sat < 0.08) }"; then
+if awk "BEGIN { exit !($sat < $threshold) }"; then
   # Practically no colour: grayscale UI that contrasts with the wallpaper
   type="scheme-monochrome"
   mode=$(awk "BEGIN { print ($lum > 0.5) ? \"dark\" : \"light\" }")
+else
+  # Colourful: match the wallpaper, light theme for light wallpapers
+  mode=$(awk "BEGIN { print ($lum > 0.55) ? \"light\" : \"dark\" }")
 fi
 
-# Saved choice from the dashboard's light/dark toggle
+# A color style chosen in the settings replaces the automatic choice
+if [ "$scheme_pref" != "auto" ]; then
+  type="scheme-$scheme_pref"
+fi
+
+# Saved choice from the light/dark setting or the dashboard toggle
 pref=$(cat "$HOME/.local/state/theme-mode" 2>/dev/null || true)
 if [ "$pref" = "light" ] || [ "$pref" = "dark" ]; then
   mode="$pref"
@@ -42,10 +63,22 @@ type="${TYPE:-$type}"
 mode="${MODE:-$mode}"
 
 # No color given and no terminal to ask in (e.g. run from the dashboard):
-# use the wallpaper's most common color
+# use the wallpaper's most prominent color, favouring colourful ones over greys
 if [ -z "$source_color" ] && [ ! -t 0 ]; then
   source_color=$(magick "$wall" -resize 96x96 -colors 8 -format "%c" histogram:info:- |
-    sort -rn | grep -oE '#[0-9A-Fa-f]{6}' | head -n1 || true)
+    awk '{
+            if (match($0, /#[0-9A-Fa-f]{6}/)) {
+                hex = substr($0, RSTART, 7)
+                r = strtonum("0x" substr(hex, 2, 2)) / 255
+                g = strtonum("0x" substr(hex, 4, 2)) / 255
+                b = strtonum("0x" substr(hex, 6, 2)) / 255
+                max = r; if (g > max) max = g; if (b > max) max = b
+                min = r; if (g < min) min = g; if (b < min) min = b
+                sat = max > 0 ? (max - min) / max : 0
+                score = ($1 + 0) * (0.15 + sat)
+                if (score > best) { best = score; pick = hex }
+            }
+        } END { print pick }' || true)
 fi
 
 # ── Generate all themes ──────────────────────────────────

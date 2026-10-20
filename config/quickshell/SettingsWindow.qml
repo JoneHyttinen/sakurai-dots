@@ -12,6 +12,7 @@ FloatingWindow {
     color: Theme.colors.surface
 
     property int page: 0
+    property var picker: null  // set from shell.qml
 
     readonly property var pages: [
         {
@@ -32,7 +33,7 @@ FloatingWindow {
         },
         {
             icon: "wallpaper",
-            label: "Wallpaper & theme"
+            label: "Wallpaper & Theme"
         },
         {
             icon: "grid_view",
@@ -180,10 +181,14 @@ FloatingWindow {
                 NotificationSettingsPage {}
                 DockSettingsPage {}
                 BarSettingsPage {}
+                WallpaperSettingsPage {
+                    picker: win.picker
+                    targetScreen: win.screen
+                }
 
                 // Placeholders until those tabs are built
                 Repeater {
-                    model: win.pages.length - 2
+                    model: win.pages.length - 5
                     delegate: Item {
                         implicitHeight: 120
                         Text {

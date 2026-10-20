@@ -50,9 +50,30 @@ Singleton {
     // Light/dark mode, as last applied by setwall
     readonly property bool dark: themeInfo.mode !== "light"
 
+    // "auto", "light" or "dark", as saved per machine
+    property string modePref: "auto"
+
+    FileView {
+        path: Quickshell.env("HOME") + "/.local/state/theme-mode"
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.modePref = text().trim() || "auto"
+        onLoadFailed: root.modePref = "auto"
+    }
+
+    // Run setwall again on the current wallpaper, keeping its accent color
+    function reapply() {
+        Quickshell.execDetached(["sh", "-c", '"$HOME/.local/bin/setwall" "$HOME/.cache/wallpaper" "$1"', "sh", themeInfo.color]);
+    }
+
+    function setModePreference(p) {
+        root.modePref = p;
+        Quickshell.execDetached(["sh", "-c", 'mkdir -p "$HOME/.local/state"; ' + 'if [ "$1" = auto ]; then rm -f "$HOME/.local/state/theme-mode"; ' + 'else printf %s "$1" > "$HOME/.local/state/theme-mode"; fi; ' + '"$HOME/.local/bin/setwall" "$HOME/.cache/wallpaper" "$2"', "sh", p, themeInfo.color]);
+    }
+
+    // The dashboard's light/dark tile
     function toggleMode() {
-        const next = dark ? "light" : "dark";
-        Quickshell.execDetached(["sh", "-c", 'mkdir -p "$HOME/.local/state" && printf %s "$1" > "$HOME/.local/state/theme-mode" ' + '&& "$HOME/.local/bin/setwall" "$HOME/.cache/wallpaper" "$2"', "sh", next, themeInfo.color]);
+        setModePreference(dark ? "light" : "dark");
     }
 
     FileView {

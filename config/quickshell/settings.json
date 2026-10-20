@@ -33,5 +33,12 @@
         "maxPopups": 4,
         "screen": "primary",
         "timeout": 5
+    },
+    "wallpaper": {
+        "folder": "",
+        "monoThreshold": 0.08,
+        "scheme": "auto",
+        "transition": "fade",
+        "transitionDuration": 1.5
     }
 }

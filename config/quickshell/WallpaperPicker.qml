@@ -10,14 +10,19 @@ PanelWindow {
     id: root
     visible: false
     color: "transparent"
-    anchors { top: true; bottom: true; left: true; right: true }
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "qs-wallpapers"
     WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     readonly property string home: Quickshell.env("HOME")
-    readonly property string folder: home + "/Pictures/Wallpapers"
+    readonly property string folder: Config.wallpaper.folder !== "" ? Config.wallpaper.folder.replace(/^~/, home) : home + "/Pictures/Wallpapers"
 
     property string current: ""   // wallpaper in use
     property string chosen: ""    // wallpaper clicked in the grid
@@ -33,15 +38,18 @@ PanelWindow {
         panel.forceActiveFocus();
         openAnim.restart();
     }
-    function close() { visible = false }
-    function toggle(target) { visible ? close() : open(target) }
+    function close() {
+        visible = false;
+    }
+    function toggle(target) {
+        visible ? close() : open(target);
+    }
 
     function pick(path) {
         chosen = path;
         swatches = [];
         colorsProc.running = false;
-        colorsProc.command = ["magick", path, "-resize", "96x96", "-colors", "8",
-                              "-format", "%c", "histogram:info:-"];
+        colorsProc.command = ["magick", path, "-resize", "96x96", "-colors", "8", "-format", "%c", "histogram:info:-"];
         colorsProc.running = true;
     }
 
@@ -58,14 +66,18 @@ PanelWindow {
         const found = [];
         for (const line of text.split("\n")) {
             const m = line.match(/^\s*(\d+):.*#([0-9A-Fa-f]{6})/);
-            if (!m) continue;
+            if (!m)
+                continue;
             const hex = "#" + m[2].toLowerCase();
             const r = parseInt(hex.substr(1, 2), 16) / 255;
             const g = parseInt(hex.substr(3, 2), 16) / 255;
             const b = parseInt(hex.substr(5, 2), 16) / 255;
             const max = Math.max(r, g, b), min = Math.min(r, g, b);
             const sat = max === 0 ? 0 : (max - min) / max;
-            found.push({ hex: hex, score: parseInt(m[1]) * (0.15 + sat) });
+            found.push({
+                hex: hex,
+                score: parseInt(m[1]) * (0.15 + sat)
+            });
         }
         found.sort((a, b) => b.score - a.score);
         swatches = found.slice(0, 5).map(f => f.hex);
@@ -74,19 +86,25 @@ PanelWindow {
     // Lets Hyprland open it: qs ipc call wallpaper toggle
     IpcHandler {
         target: "wallpaper"
-        function toggle(): void { root.toggle() }
+        function toggle(): void {
+            root.toggle();
+        }
     }
 
     // Which wallpaper is in use (setwall keeps a link to it)
     Process {
         id: currentProc
         command: ["readlink", "-f", root.home + "/.cache/wallpaper"]
-        stdout: StdioCollector { onStreamFinished: root.current = text.trim() }
+        stdout: StdioCollector {
+            onStreamFinished: root.current = text.trim()
+        }
     }
 
     Process {
         id: colorsProc
-        stdout: StdioCollector { onStreamFinished: root.parseColors(text) }
+        stdout: StdioCollector {
+            onStreamFinished: root.parseColors(text)
+        }
     }
 
     // Dimmed backdrop; clicking it closes the picker
@@ -116,16 +134,36 @@ PanelWindow {
 
         ParallelAnimation {
             id: openAnim
-            NumberAnimation { target: panel; property: "opacity"; from: 0; to: 1; duration: 160 }
-            NumberAnimation { target: panel; property: "scale"; from: 0.97; to: 1; duration: 200; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                target: panel
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 160
+            }
+            NumberAnimation {
+                target: panel
+                property: "scale"
+                from: 0.97
+                to: 1
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
         }
 
         // Swallow clicks so they don't reach the backdrop
-        MouseArea { anchors.fill: parent }
+        MouseArea {
+            anchors.fill: parent
+        }
 
         Column {
             id: col
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                margins: 12
+            }
             spacing: 12
 
             Text {
@@ -166,7 +204,10 @@ PanelWindow {
                     onClicked: root.pick(filePath)
 
                     ClippingRectangle {
-                        anchors { fill: parent; margins: 6 }
+                        anchors {
+                            fill: parent
+                            margins: 6
+                        }
                         radius: 10
                         color: Theme.colors.surfaceContainerHigh
 
@@ -178,13 +219,21 @@ PanelWindow {
                             asynchronous: true
                             cache: true
                             scale: thumb.containsMouse ? 1.04 : 1
-                            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                            Behavior on scale {
+                                NumberAnimation {
+                                    duration: 180
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                         }
                     }
 
                     // Outline: accent for the one you picked, subtle for the one in use
                     Rectangle {
-                        anchors { fill: parent; margins: 6 }
+                        anchors {
+                            fill: parent
+                            margins: 6
+                        }
                         radius: 10
                         color: "transparent"
                         border.width: thumb.isChosen ? 3 : thumb.isCurrent ? 2 : 0
@@ -235,7 +284,12 @@ PanelWindow {
                             border.width: sw.containsMouse ? 3 : 1
                             border.color: sw.containsMouse ? Theme.colors.text : Theme.colors.outlineVariant
                             scale: sw.pressed ? 0.9 : (sw.containsMouse ? 1.1 : 1)
-                            Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                            Behavior on scale {
+                                NumberAnimation {
+                                    duration: 140
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                         }
                     }
                 }

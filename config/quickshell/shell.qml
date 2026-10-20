@@ -13,6 +13,9 @@ ShellRoot {
     }
     NotificationPopups {}
     OSD {}
+    SettingsWindow {
+        picker: appWallpaperPicker
+    }
 
     IpcHandler {
         target: "dock"
