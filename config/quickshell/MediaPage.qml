@@ -14,8 +14,7 @@ Item {
     // The player picked in the list, or else the one that's playing
     property var chosen: null
     readonly property var players: Mpris.players.values
-    readonly property var player: (chosen !== null && players.includes(chosen)) ? chosen
-        : players.find(p => p.isPlaying) ?? players[0] ?? null
+    readonly property var player: (chosen !== null && players.includes(chosen)) ? chosen : players.find(p => p.isPlaying) ?? players[0] ?? null
 
     // Visualizer levels from cava, 0..1
     property var levels: []
@@ -28,19 +27,25 @@ Item {
 
     function setVol(v) {
         v = Math.max(0, Math.min(1, v));
-        if (playerVolume) player.volume = v;
-        else if (sink?.audio) sink.audio.volume = v;
+        if (playerVolume)
+            player.volume = v;
+        else if (sink?.audio)
+            sink.audio.volume = v;
     }
 
-    PwObjectTracker { objects: [page.sink] }
+    PwObjectTracker {
+        objects: [page.sink]
+    }
 
     // Spotify reports cover art at an address that doesn't serve the image
     function artUrl(url) {
-        if (!url) return "";
+        if (!url)
+            return "";
         return url.replace("https://open.spotify.com/image/", "https://i.scdn.co/image/");
     }
     function fmt(s) {
-        if (!isFinite(s) || s < 0) s = 0;
+        if (!isFinite(s) || s < 0)
+            s = 0;
         const m = Math.floor(s / 60);
         const sec = Math.floor(s % 60);
         return m + ":" + (sec < 10 ? "0" : "") + sec;
@@ -57,14 +62,15 @@ Item {
     }
 
     Process {
-        running: page.active
+        running: page.active && Config.performance.visualizer
         command: ["cava", "-p", Quickshell.env("HOME") + "/.config/quickshell/cava.conf"]
         stdout: SplitParser {
             onRead: data => {
                 page.levels = data.split(";").filter(s => s !== "").map(n => Number(n) / 100);
             }
         }
-        onRunningChanged: if (!running) page.levels = []
+        onRunningChanged: if (!running)
+            page.levels = []
     }
 
     // ── A round control button ───────────────────────────
@@ -85,16 +91,22 @@ Item {
             color: btn.big ? Theme.colors.primary : Theme.colors.surfaceContainerHigh
             opacity: btn.big ? 1 : (btn.containsMouse ? 1 : 0)
             scale: btn.pressed ? 0.92 : 1
-            Behavior on opacity { NumberAnimation { duration: 120 } }
-            Behavior on scale { NumberAnimation { duration: 100 } }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 120
+                }
+            }
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 100
+                }
+            }
         }
         Icon {
             anchors.centerIn: parent
             name: btn.icon
             font.pixelSize: btn.big ? 28 : 22
-            color: btn.big ? Theme.colors.primaryText
-                : btn.on ? Theme.colors.primary
-                : Theme.colors.text
+            color: btn.big ? Theme.colors.primaryText : btn.on ? Theme.colors.primary : Theme.colors.text
         }
     }
 
@@ -125,10 +137,12 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: height / 2
-                        color: chip.selected ? Theme.colors.primary
-                            : chip.containsMouse ? Theme.colors.surfaceContainerHigh
-                            : Theme.colors.surfaceContainer
-                        Behavior on color { ColorAnimation { duration: 150 } }
+                        color: chip.selected ? Theme.colors.primary : chip.containsMouse ? Theme.colors.surfaceContainerHigh : Theme.colors.surfaceContainer
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 150
+                            }
+                        }
                     }
                     Row {
                         id: chipRow
@@ -201,7 +215,7 @@ Item {
             MultiEffect {
                 anchors.fill: parent
                 source: bgArt
-                visible: bgArt.status === Image.Ready
+                visible: bgArt.status === Image.Ready && Config.performance.mediaBlur
                 blurEnabled: true
                 blur: 1.0
                 blurMax: 64
@@ -210,13 +224,17 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 color: Theme.colors.surfaceContainer
-                opacity: bgArt.status === Image.Ready ? 0.72 : 1
+                opacity: bgArt.status === Image.Ready && Config.performance.mediaBlur ? 0.72 : 1
             }
 
             // Album art
             ClippingRectangle {
                 id: art
-                anchors { left: parent.left; top: parent.top; margins: 20 }
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    margins: 20
+                }
                 width: 180
                 height: 180
                 radius: 14
@@ -250,8 +268,10 @@ Item {
             // Track info, progress and controls
             Column {
                 anchors {
-                    left: art.right; leftMargin: 24
-                    right: parent.right; rightMargin: 20
+                    left: art.right
+                    leftMargin: 24
+                    right: parent.right
+                    rightMargin: 20
                     verticalCenter: art.verticalCenter
                 }
                 spacing: 4
@@ -283,7 +303,10 @@ Item {
                     font.pixelSize: Theme.fontSize.small
                 }
 
-                Item { width: 1; height: 14 }
+                Item {
+                    width: 1
+                    height: 14
+                }
 
                 // Progress; drag to seek
                 SliderBar {
@@ -291,9 +314,10 @@ Item {
                     live: false
                     value: (page.player?.length ?? 0) > 0 ? page.player.position / page.player.length : 0
                     onMoved: v => {
-                      if (!page.player?.canSeek) return;
-                      page.player.position = v * page.player.length;
-                      page.player.positionChanged();
+                        if (!page.player?.canSeek)
+                            return;
+                        page.player.position = v * page.player.length;
+                        page.player.positionChanged();
                     }
                 }
                 Item {
@@ -316,7 +340,10 @@ Item {
                     }
                 }
 
-                Item { width: 1; height: 6 }
+                Item {
+                    width: 1
+                    height: 6
+                }
 
                 Row {
                     spacing: 10
@@ -351,17 +378,12 @@ Item {
                         icon: loop === MprisLoopState.Track ? "repeat_one" : "repeat"
                         on: loop !== MprisLoopState.None
                         // Off → whole playlist → one track → off
-                        onClicked: page.player.loopState =
-                            loop === MprisLoopState.None ? MprisLoopState.Playlist
-                            : loop === MprisLoopState.Playlist ? MprisLoopState.Track
-                            : MprisLoopState.None
+                        onClicked: page.player.loopState = loop === MprisLoopState.None ? MprisLoopState.Playlist : loop === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
                     }
                     // Volume: click to show the slider, scroll to adjust
                     ControlButton {
                         anchors.verticalCenter: parent.verticalCenter
-                        icon: page.vol < 0.01 ? "volume_mute"
-                            : page.vol < 0.5 ? "volume_down"
-                            : "volume_up"
+                        icon: page.vol < 0.01 ? "volume_mute" : page.vol < 0.5 ? "volume_down" : "volume_up"
                         on: page.volumeOpen
                         onClicked: page.volumeOpen = !page.volumeOpen
                         onWheel: w => page.setVol(page.vol + (w.angleDelta.y > 0 ? 0.05 : -0.05))
@@ -373,7 +395,12 @@ Item {
                         visible: width > 0
                         value: page.vol
                         onMoved: v => page.setVol(v)
-                        Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        Behavior on width {
+                            NumberAnimation {
+                                duration: 180
+                                easing.type: Easing.OutCubic
+                            }
+                        }
                     }
                 }
             }
@@ -381,15 +408,24 @@ Item {
             // ── Waveform driven by the audio ─────────────
             Canvas {
                 id: wave
-                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 20 }
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                    margins: 20
+                }
                 height: 64
 
                 readonly property string fillColor: Theme.colors.primary
                 onFillColorChanged: requestPaint()
 
+                visible: Config.performance.visualizer
+
                 Connections {
                     target: page
-                    function onLevelsChanged() { wave.requestPaint() }
+                    function onLevelsChanged() {
+                        wave.requestPaint();
+                    }
                 }
 
                 // A smooth curve through the levels, mirrored around the middle
@@ -399,10 +435,14 @@ Item {
 
                     const v = page.levels;
                     const n = v.length;
-                    if (n < 2) return;
+                    if (n < 2)
+                        return;
 
                     const w = width, mid = height / 2;
-                    const pts = v.map((l, i) => ({ x: i / (n - 1) * w, y: Math.max(1, l * mid) }));
+                    const pts = v.map((l, i) => ({
+                                x: i / (n - 1) * w,
+                                y: Math.max(1, l * mid)
+                            }));
 
                     ctx.fillStyle = fillColor;
                     ctx.globalAlpha = 0.8;

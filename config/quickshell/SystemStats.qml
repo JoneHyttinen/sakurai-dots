@@ -26,7 +26,9 @@ Singleton {
 
     property real uptime: 0  // seconds
 
-    function gib(kib) { return (kib / 1048576).toFixed(1) }
+    function gib(kib) {
+        return (kib / 1048576).toFixed(1);
+    }
 
     // Append to a history, keeping only the last minute
     function push(arr, v) {
@@ -36,9 +38,12 @@ Singleton {
 
     function rate(bytesPerSec) {
         const bits = bytesPerSec * 8;
-        if (bits >= 1e9) return (bits / 1e9).toFixed(2) + " Gbit/s";
-        if (bits >= 1e6) return (bits / 1e6).toFixed(1) + " Mbit/s";
-        if (bits >= 1e3) return (bits / 1e3).toFixed(0) + " kbit/s";
+        if (bits >= 1e9)
+            return (bits / 1e9).toFixed(2) + " Gbit/s";
+        if (bits >= 1e6)
+            return (bits / 1e6).toFixed(1) + " Mbit/s";
+        if (bits >= 1e3)
+            return (bits / 1e3).toFixed(0) + " kbit/s";
         return Math.round(bits) + " bit/s";
     }
 
@@ -69,7 +74,10 @@ Singleton {
                 root.cpuPercent = dt > 0 ? Math.max(0, Math.min(1, 1 - di / dt)) : 0;
                 root.cpuHistory = root.push(root.cpuHistory, root.cpuPercent);
             }
-            root.lastCpu = { total: total, idle: idle };
+            root.lastCpu = {
+                total: total,
+                idle: idle
+            };
         }
     }
 
@@ -80,7 +88,8 @@ Singleton {
             let rx = 0, tx = 0;
             for (const line of text().split("\n").slice(2)) {
                 const m = line.trim().match(/^([^:]+):\s*(.*)$/);
-                if (!m || m[1] === "lo") continue;
+                if (!m || m[1] === "lo")
+                    continue;
                 const f = m[2].split(/\s+/).map(Number);
                 rx += f[0];
                 tx += f[8];
@@ -93,7 +102,11 @@ Singleton {
                     root.netUp = Math.max(0, (tx - root.lastNet.tx) / dt);
                 }
             }
-            root.lastNet = { rx: rx, tx: tx, t: now };
+            root.lastNet = {
+                rx: rx,
+                tx: tx,
+                t: now
+            };
         }
     }
 
@@ -107,10 +120,10 @@ Singleton {
     property string tempPath: ""
     Process {
         running: true
-        command: ["sh", "-c",
-            'for h in /sys/class/hwmon/hwmon*; do case "$(cat "$h/name")" in ' +
-            'k10temp|zenpower|coretemp) echo "$h/temp1_input"; exit;; esac; done']
-        stdout: StdioCollector { onStreamFinished: root.tempPath = text.trim() }
+        command: ["sh", "-c", 'for h in /sys/class/hwmon/hwmon*; do case "$(cat "$h/name")" in ' + 'k10temp|zenpower|coretemp) echo "$h/temp1_input"; exit;; esac; done']
+        stdout: StdioCollector {
+            onStreamFinished: root.tempPath = text.trim()
+        }
     }
     FileView {
         id: tempFile
@@ -119,7 +132,7 @@ Singleton {
     }
 
     Timer {
-        interval: 1000
+        interval: Config.performance.statsInterval
         running: true
         repeat: true
         triggeredOnStart: true
@@ -128,7 +141,8 @@ Singleton {
             stat.reload();
             netdev.reload();
             uptimeFile.reload();
-            if (root.tempPath !== "") tempFile.reload();
+            if (root.tempPath !== "")
+                tempFile.reload();
         }
     }
 }

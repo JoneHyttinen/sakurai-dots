@@ -11,9 +11,12 @@ Singleton {
     property alias dock: adapter.dock
     property alias bar: adapter.bar
     property alias wallpaper: adapter.wallpaper
+    property alias performance: adapter.performance
 
     FileView {
-        path: Quickshell.env("HOME") + "/.config/quickshell/settings.json"
+        // One settings file per machine, named after its hostname, so
+        // pulling changes from the other machine never overwrites these
+        path: Host.name !== "" ? Quickshell.env("HOME") + "/.config/quickshell/settings/" + Host.name + ".json" : ""
         watchChanges: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
@@ -71,6 +74,13 @@ Singleton {
                 property real transitionDuration: 1.0  // seconds
                 property string scheme: "auto"         // "auto" or a matugen scheme name
                 property real monoThreshold: 0.08      // below this, a wallpaper counts as black and white
+            }
+
+            property JsonObject performance: JsonObject {
+                property bool windowPreviews: true  // live previews when hovering the dock
+                property bool mediaBlur: true       // blurred album art in the Media tab
+                property bool visualizer: true      // audio waveform in the Media tab
+                property int statsInterval: 1000    // ms between system stats readings
             }
         }
     }

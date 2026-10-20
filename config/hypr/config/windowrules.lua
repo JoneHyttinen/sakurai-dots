@@ -121,6 +121,7 @@ hl.window_rule({
 	match = { class = "^(mpv|org.kde.haruna|.*plex.*|org\\.kde\\.gwenview|.*vlc.*)$" },
 	opacity = "1.0 override",
 })
+hl.window_rule({ match = { class = "^(spotify|discord|vesktop)$" }, opacity = "0.95 override 0.88 override" })
 
 -- Float Utility Windows
 local floatApps = {

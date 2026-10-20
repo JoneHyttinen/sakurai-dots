@@ -223,4 +223,62 @@ Column {
             }
         }
     }
+
+    SettingsSection {
+        title: "Performance"
+
+        SettingRow {
+            label: "Live window previews"
+            description: "Previews of an app's windows when hovering it in the dock"
+
+            SettingSwitch {
+                checked: Config.performance.windowPreviews
+                onToggled: v => Config.performance.windowPreviews = v
+            }
+        }
+
+        SettingRow {
+            label: "Blurred album art"
+            description: "Background of the Media tab"
+
+            SettingSwitch {
+                checked: Config.performance.mediaBlur
+                onToggled: v => Config.performance.mediaBlur = v
+            }
+        }
+
+        SettingRow {
+            label: "Audio waveform"
+            description: "Runs cava while the Media tab is open"
+
+            SettingSwitch {
+                checked: Config.performance.visualizer
+                onToggled: v => Config.performance.visualizer = v
+            }
+        }
+
+        SettingRow {
+            label: "System stats refresh"
+            description: "How often CPU, memory and network are read"
+
+            SettingChoice {
+                options: [
+                    {
+                        value: 1000,
+                        label: "1 s"
+                    },
+                    {
+                        value: 2000,
+                        label: "2 s"
+                    },
+                    {
+                        value: 5000,
+                        label: "5 s"
+                    },
+                ]
+                current: Config.performance.statsInterval
+                onChosen: v => Config.performance.statsInterval = v
+            }
+        }
+    }
 }

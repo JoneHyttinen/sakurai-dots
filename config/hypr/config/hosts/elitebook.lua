@@ -36,3 +36,18 @@ hl.gesture({
 		hl.exec_cmd("qs ipc call dashboard toggle")
 	end,
 })
+
+-- Lighter effects for the laptop's integrated GPU
+hl.config({
+	decoration = {
+		blur = { enabled = false }, -- the most expensive effect
+		shadow = { enabled = false },
+		inactive_opacity = 1.0, -- see-through windows need blur to look right anyway
+	},
+	misc = {
+		vfr = true, -- only redraw the screen when something changes
+	},
+})
+
+-- Slightly quicker animations feel smoother on slower hardware
+hl.animation({ leaf = "global", enabled = true, speed = 2, bezier = "quick" })

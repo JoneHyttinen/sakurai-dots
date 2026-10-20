@@ -111,9 +111,14 @@
       criticalPowerAction = "PowerOff";
   };
 
-  services.thermald.enable = true;
+  # Hardware video decoding for Intel GPUs: smoother, cooler video playback
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [ intel-media-driver ];
+  };
 
-  hardware.graphics.extraPackages = [ pkgs.intel-media-driver ];
+  # Keeps Intel CPUs from overheating and throttling hard
+  services.thermald.enable = true;
 
   nix.settings.auto-optimise-store = true;
 

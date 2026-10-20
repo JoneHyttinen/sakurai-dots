@@ -9,7 +9,7 @@ wall="$(realpath "$1")"
 source_color="${2:-}"
 
 # ── Settings from the settings window (settings.json) ────
-settings="$HOME/.config/quickshell/settings.json"
+settings="$HOME/.config/quickshell/settings/$(cat /etc/hostname).json"
 cfg() { jq -r "$1 // empty" "$settings" 2>/dev/null || true; }
 
 transition=$(cfg '.wallpaper.transition')

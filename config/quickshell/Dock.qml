@@ -355,7 +355,7 @@ PanelWindow {
                 return;
             if (containsMouse) {
                 root.hovered = item;
-                root.previewFor = (windows.length >= 2 && root.menuFor === null) ? item : null;
+                root.previewFor = (Config.performance.windowPreviews && windows.length >= 2 && root.menuFor === null) ? item : null;
             } else {
                 if (root.hovered === item)
                     root.hovered = null;
