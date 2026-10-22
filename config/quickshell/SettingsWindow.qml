@@ -186,20 +186,8 @@ FloatingWindow {
                     targetScreen: win.screen
                 }
                 HyprlandSettingsPage {}
-
-                // Placeholders until those tabs are built
-                Repeater {
-                    model: win.pages.length - 6
-                    delegate: Item {
-                        implicitHeight: 120
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Coming soon"
-                            color: Theme.colors.subtext
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize.body
-                        }
-                    }
+                AboutPage {
+                    active: win.visible && win.page === 6
                 }
             }
         }

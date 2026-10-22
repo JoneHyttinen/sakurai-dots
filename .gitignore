@@ -8,3 +8,6 @@ config/alacritty/matugen.toml
 config/nvim/lua/matugen_palette.lua
 config/qt6ct/colors/matugen.conf
 config/fetch/logo.txt
+
+# Settings file
+config/hypr/config/settings.lua
