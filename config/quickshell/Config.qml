@@ -42,6 +42,8 @@ Singleton {
                 property int frameTop: 40
                 property int frameSide: 8
                 property int frameRadius: 20
+                property real panelOpacity: 1.0 // frame and attached panels
+                property bool panelBlur: true   // blur behind them, when see-through
             }
 
             property JsonObject notifications: JsonObject {
@@ -103,7 +105,9 @@ Singleton {
                 property bool shadow: true
                 property int shadowRange: 20
                 property bool animations: true
-                property string animSpeed: "normal" // "fast", "normal" or "slow"
+                property string animSpeed: "normal"    // "fast", "normal" or "slow"
+                property string shadowStyle: "shadow"  // "none", "shadow" or "glow"
+                property real glowStrength: 0.6        // 0..1, how opaque the glow is
             }
         }
     }

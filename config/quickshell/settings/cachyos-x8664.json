@@ -5,6 +5,8 @@
         "frameRadius": 15,
         "frameSide": 8,
         "frameTop": 45,
+        "panelBlur": true,
+        "panelOpacity": 0.85,
         "radius": 12
     },
     "bar": {
@@ -37,12 +39,14 @@
         "blurSize": 8,
         "borderSize": 2,
         "gapsIn": 4,
-        "gapsOut": 10,
+        "gapsOut": 6,
+        "glowStrength": 0.5,
         "inactiveOpacity": 0.85,
         "matchFrame": true,
         "rounding": 12,
         "shadow": true,
-        "shadowRange": 28
+        "shadowRange": 12,
+        "shadowStyle": "glow"
     },
     "notifications": {
         "keepCritical": true,

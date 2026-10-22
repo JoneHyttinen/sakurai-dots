@@ -225,6 +225,124 @@ Column {
     }
 
     SettingsSection {
+        title: "Decorations"
+
+        SettingRow {
+            label: "Window effect"
+            description: "Glow lights up the focused window in your accent color"
+
+            SettingChoice {
+                options: [
+                    {
+                        value: "none",
+                        label: "None"
+                    },
+                    {
+                        value: "shadow",
+                        label: "Shadow"
+                    },
+                    {
+                        value: "glow",
+                        label: "Glow"
+                    },
+                ]
+                current: Config.hyprland.shadowStyle
+                onChosen: v => Config.hyprland.shadowStyle = v
+            }
+        }
+
+        SettingRow {
+            visible: Config.hyprland.shadowStyle === "glow"
+            label: "Glow strength"
+
+            SettingSlider {
+                from: 0.1
+                to: 1
+                step: 0.05
+                decimals: 2
+                value: Config.hyprland.glowStrength
+                onEdited: v => Config.hyprland.glowStrength = v
+            }
+        }
+
+        SettingRow {
+            visible: Config.hyprland.shadowStyle !== "none"
+            label: Config.hyprland.shadowStyle === "glow" ? "Glow size" : "Shadow size"
+
+            SettingSlider {
+                from: 2
+                to: 50
+                step: 1
+                suffix: " px"
+                value: Config.hyprland.shadowRange
+                onEdited: v => Config.hyprland.shadowRange = v
+            }
+        }
+
+        SettingRow {
+            label: "Window blur"
+            description: "Behind see-through windows; the most demanding effect"
+
+            SettingSwitch {
+                checked: Config.hyprland.blur
+                onToggled: v => Config.hyprland.blur = v
+            }
+        }
+
+        SettingRow {
+            visible: Config.hyprland.blur
+            label: "Blur size"
+
+            SettingSlider {
+                from: 1
+                to: 15
+                step: 1
+                value: Config.hyprland.blurSize
+                onEdited: v => Config.hyprland.blurSize = v
+            }
+        }
+
+        SettingRow {
+            visible: Config.hyprland.blur
+            label: "Blur passes"
+            description: "More passes look smoother but cost more"
+
+            SettingSlider {
+                from: 1
+                to: 5
+                step: 1
+                value: Config.hyprland.blurPasses
+                onEdited: v => Config.hyprland.blurPasses = v
+            }
+        }
+
+        SettingRow {
+            label: "Panel transparency"
+            description: "The frame, bar popups, dashboard, dock, notifications and OSD"
+
+            SettingSlider {
+                from: 0.5
+                to: 1
+                step: 0.05
+                decimals: 2
+                value: Config.appearance.panelOpacity
+                onEdited: v => Config.appearance.panelOpacity = v
+            }
+        }
+
+        SettingRow {
+            visible: Config.appearance.panelOpacity < 1
+            label: "Panel blur"
+            description: "Frosted glass behind see-through panels"
+
+            SettingSwitch {
+                checked: Config.appearance.panelBlur
+                onToggled: v => Config.appearance.panelBlur = v
+            }
+        }
+    }
+
+    SettingsSection {
         title: "Performance"
 
         SettingRow {

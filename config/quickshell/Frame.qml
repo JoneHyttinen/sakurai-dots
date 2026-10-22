@@ -16,17 +16,29 @@ Scope {
     }
 
     EdgeZone {
-        anchors { left: true; top: true; bottom: true }
+        anchors {
+            left: true
+            top: true
+            bottom: true
+        }
         implicitWidth: Theme.frame.side
         exclusiveZone: Theme.frame.side
     }
     EdgeZone {
-        anchors { right: true; top: true; bottom: true }
+        anchors {
+            right: true
+            top: true
+            bottom: true
+        }
         implicitWidth: Theme.frame.side
         exclusiveZone: Theme.frame.side
     }
     EdgeZone {
-        anchors { left: true; right: true; bottom: true }
+        anchors {
+            left: true
+            right: true
+            bottom: true
+        }
         implicitHeight: Theme.frame.side
         exclusiveZone: Theme.frame.side
     }
@@ -34,7 +46,12 @@ Scope {
     // The visible frame
     PanelWindow {
         screen: root.modelData
-        anchors { top: true; bottom: true; left: true; right: true }
+        anchors {
+            top: true
+            bottom: true
+            left: true
+            right: true
+        }
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
         mask: Region {}  // clicks pass straight through
@@ -47,7 +64,7 @@ Scope {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: Theme.colors.surface
+                fillColor: Qt.alpha(Theme.colors.surface, Config.appearance.panelOpacity)
                 strokeColor: "transparent"
                 fillRule: ShapePath.OddEvenFill  // inner rectangle becomes a hole
 

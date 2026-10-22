@@ -10,6 +10,8 @@ PanelWindow {
     property var wallpaperPicker: null
     screen: modelData
 
+    WlrLayershell.namespace: "qs-bar"
+
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
 
     anchors {

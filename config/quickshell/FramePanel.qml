@@ -7,7 +7,7 @@ Canvas {
     property string edge: "top"
     property real fillet: Theme.frame.radius
     property real corner: Theme.radius
-    property color fill: Theme.colors.surface
+    property color fill: Qt.alpha(Theme.colors.surface, Config.appearance.panelOpacity)
 
     antialiasing: true
 
@@ -17,7 +17,8 @@ Canvas {
         const PI = Math.PI;
 
         ctx.reset();
-        ctx.fillStyle = fill.toString();
+        // Canvas wants CSS-style rgba() for see-through colors
+        ctx.fillStyle = "rgba(" + Math.round(fill.r * 255) + "," + Math.round(fill.g * 255) + "," + Math.round(fill.b * 255) + "," + fill.a + ")";
         ctx.beginPath();
 
         if (edge === "top") {
@@ -84,6 +85,8 @@ Canvas {
     // Redraw when first created, when the canvas becomes usable again
     // (e.g. after its window was hidden), and when shown
     Component.onCompleted: requestPaint()
-    onAvailableChanged: if (available) requestPaint()
-    onVisibleChanged: if (visible) requestPaint()
+    onAvailableChanged: if (available)
+        requestPaint()
+    onVisibleChanged: if (visible)
+        requestPaint()
 }
