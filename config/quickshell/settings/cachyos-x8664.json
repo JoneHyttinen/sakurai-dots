@@ -9,6 +9,13 @@
         "panelOpacity": 0.85,
         "radius": 12
     },
+    "apps": {
+        "browser": "/usr/lib/firefox/firefox",
+        "calculator": "gnome-calculator",
+        "editor": "nvim",
+        "fileManager": "dolphin",
+        "terminal": "alacritty"
+    },
     "bar": {
         "dateFormat": "ddd d MMM",
         "showBattery": false,

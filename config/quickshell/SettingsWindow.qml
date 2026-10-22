@@ -40,6 +40,10 @@ FloatingWindow {
             label: "Hyprland"
         },
         {
+            icon: "apps",
+            label: "Default apps"
+        },
+        {
             icon: "info",
             label: "About"
         },
@@ -186,8 +190,9 @@ FloatingWindow {
                     targetScreen: win.screen
                 }
                 HyprlandSettingsPage {}
+                AppsSettingsPage {}
                 AboutPage {
-                    active: win.visible && win.page === 6
+                    active: win.visible && win.page === 7
                 }
             }
         }

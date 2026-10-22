@@ -24,6 +24,16 @@ do
 	end
 end
 
+-- Default apps from the settings window (per machine); binds.lua uses them
+do
+	local path = os.getenv("HOME") .. "/.local/state/hypr/apps.lua"
+	local f = io.open(path)
+	if f then
+		f:close()
+		dofile(path)
+	end
+end
+
 require("config.environment")
 require("config.inputs")
 require("config.binds")

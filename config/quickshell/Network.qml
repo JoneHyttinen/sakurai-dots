@@ -14,10 +14,7 @@ MouseArea {
     readonly property real strength: network?.signalStrength ?? 0
 
     function wifiIcon(s) {
-        return s > 0.75 ? "signal_wifi_4_bar"
-            : s > 0.5 ? "network_wifi_3_bar"
-            : s > 0.25 ? "network_wifi_2_bar"
-            : "network_wifi_1_bar";
+        return s > 0.75 ? "signal_wifi_4_bar" : s > 0.5 ? "network_wifi_3_bar" : s > 0.25 ? "network_wifi_2_bar" : "network_wifi_1_bar";
     }
 
     implicitWidth: icon.implicitWidth
@@ -46,18 +43,25 @@ MouseArea {
         let cur = "";
         for (let i = 0; i < line.length; i++) {
             const c = line[i];
-            if (c === "\\" && i + 1 < line.length) cur += line[++i];
-            else if (c === ":") { out.push(cur); cur = ""; }
-            else cur += c;
+            if (c === "\\" && i + 1 < line.length)
+                cur += line[++i];
+            else if (c === ":") {
+                out.push(cur);
+                cur = "";
+            } else
+                cur += c;
         }
         out.push(cur);
         return out;
     }
 
     function refresh() {
-        if (!radioProc.running) radioProc.running = true;
-        if (!savedProc.running) savedProc.running = true;
-        if (wifiOn && !listProc.running) listProc.running = true;
+        if (!radioProc.running)
+            radioProc.running = true;
+        if (!savedProc.running)
+            savedProc.running = true;
+        if (wifiOn && !listProc.running)
+            listProc.running = true;
     }
 
     function run(cmd) {
@@ -76,11 +80,14 @@ MouseArea {
             run(["nmcli", "device", "wifi", "connect", n.ssid, "password", password]);
     }
 
-    function forget(ssid) { run(["nmcli", "connection", "delete", "id", ssid]) }
+    function forget(ssid) {
+        run(["nmcli", "connection", "delete", "id", ssid]);
+    }
 
     function setWifi(on) {
         wifiOn = on;
-        if (!on) networks = [];
+        if (!on)
+            networks = [];
         run(["nmcli", "radio", "wifi", on ? "on" : "off"]);
     }
 
@@ -88,23 +95,24 @@ MouseArea {
     Process {
         running: true
         command: ["nmcli", "-t", "-f", "TYPE", "device"]
-        stdout: StdioCollector { onStreamFinished: root.hasWifi = text.split("\n").includes("wifi") }
+        stdout: StdioCollector {
+            onStreamFinished: root.hasWifi = text.split("\n").includes("wifi")
+        }
     }
 
     Process {
         id: radioProc
         command: ["nmcli", "radio", "wifi"]
-        stdout: StdioCollector { onStreamFinished: root.wifiOn = text.trim() === "enabled" }
+        stdout: StdioCollector {
+            onStreamFinished: root.wifiOn = text.trim() === "enabled"
+        }
     }
 
     Process {
         id: savedProc
         command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"]
         stdout: StdioCollector {
-            onStreamFinished: root.saved = text.split("\n").filter(l => l !== "")
-                .map(root.splitTerse)
-                .filter(f => f[1] === "802-11-wireless")
-                .map(f => f[0])
+            onStreamFinished: root.saved = text.split("\n").filter(l => l !== "").map(root.splitTerse).filter(f => f[1] === "802-11-wireless").map(f => f[0])
         }
     }
 
@@ -116,22 +124,23 @@ MouseArea {
                 // One entry per network name: the connected one, or else the strongest
                 const best = {};
                 for (const l of text.split("\n")) {
-                    if (l === "") continue;
+                    if (l === "")
+                        continue;
                     const f = root.splitTerse(l);
                     const ssid = f[1];
-                    if (!ssid) continue;  // hidden networks
+                    if (!ssid)
+                        continue;  // hidden networks
                     const n = {
                         ssid: ssid,
                         signal: Number(f[2]),
                         secure: f[3] !== "" && f[3] !== "--",
-                        active: f[0] === "*",
+                        active: f[0] === "*"
                     };
                     const prev = best[ssid];
-                    if (!prev || n.active || (!prev.active && n.signal > prev.signal)) best[ssid] = n;
+                    if (!prev || n.active || (!prev.active && n.signal > prev.signal))
+                        best[ssid] = n;
                 }
-                root.networks = Object.values(best)
-                    .sort((a, b) => (b.active - a.active) || (b.signal - a.signal))
-                    .slice(0, 12);
+                root.networks = Object.values(best).sort((a, b) => (b.active - a.active) || (b.signal - a.signal)).slice(0, 12);
             }
         }
     }
@@ -139,7 +148,9 @@ MouseArea {
     // Connecting, forgetting and switching Wi-Fi on/off
     Process {
         id: actionProc
-        stderr: StdioCollector { id: actionErr }
+        stderr: StdioCollector {
+            id: actionErr
+        }
         onExited: code => {
             if (code !== 0) {
                 // nmcli's last line is the reason, e.g. "Secrets were required, but not provided"
@@ -198,14 +209,21 @@ MouseArea {
             width: parent.width
             spacing: 6
 
-            Rectangle { width: parent.width; height: 1; color: Theme.colors.outlineVariant }
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: Theme.colors.outlineVariant
+            }
 
             Item {
                 width: parent.width
                 height: 30
 
                 Text {
-                    anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
+                    }
                     text: "Wi-Fi"
                     color: Theme.colors.subtext
                     font.family: Theme.font
@@ -213,7 +231,10 @@ MouseArea {
                     font.weight: Font.Medium
                 }
                 SettingSwitch {
-                    anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
                     checked: root.wifiOn
                     onToggled: v => root.setWifi(v)
                 }
@@ -263,7 +284,8 @@ MouseArea {
                                 hoverEnabled: true
                                 cursorShape: net.modelData.active ? Qt.ArrowCursor : Qt.PointingHandCursor
                                 onClicked: {
-                                    if (net.modelData.active || net.busy) return;
+                                    if (net.modelData.active || net.busy)
+                                        return;
                                     root.error = "";
                                     if (net.modelData.secure && !net.isSaved)
                                         root.expanded = net.open ? "" : net.modelData.ssid;
@@ -280,15 +302,21 @@ MouseArea {
 
                                 Icon {
                                     id: sigIcon
-                                    anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
+                                    anchors {
+                                        left: parent.left
+                                        leftMargin: 10
+                                        verticalCenter: parent.verticalCenter
+                                    }
                                     name: root.wifiIcon(net.modelData.signal / 100)
                                     color: net.modelData.active ? Theme.colors.primary : Theme.colors.text
                                 }
 
                                 Text {
                                     anchors {
-                                        left: sigIcon.right; leftMargin: 10
-                                        right: netStatus.left; rightMargin: 8
+                                        left: sigIcon.right
+                                        leftMargin: 10
+                                        right: netStatus.left
+                                        rightMargin: 8
                                         verticalCenter: parent.verticalCenter
                                     }
                                     text: net.modelData.ssid
@@ -301,15 +329,17 @@ MouseArea {
 
                                 Row {
                                     id: netStatus
-                                    anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
+                                    anchors {
+                                        right: parent.right
+                                        rightMargin: 8
+                                        verticalCenter: parent.verticalCenter
+                                    }
                                     spacing: 6
 
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
                                         visible: text !== ""
-                                        text: net.busy ? "Connecting…"
-                                            : net.modelData.active ? "Connected"
-                                            : net.isSaved ? "Saved" : ""
+                                        text: net.busy ? "Connecting…" : net.modelData.active ? "Connected" : net.isSaved ? "Saved" : ""
                                         color: Theme.colors.subtext
                                         font.family: Theme.font
                                         font.pixelSize: Theme.fontSize.tiny
@@ -362,14 +392,21 @@ MouseArea {
 
                                     TextInput {
                                         id: pass
-                                        anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                                        anchors {
+                                            fill: parent
+                                            leftMargin: 10
+                                            rightMargin: 10
+                                        }
                                         verticalAlignment: TextInput.AlignVCenter
                                         echoMode: TextInput.Password
                                         color: Theme.colors.text
                                         font.family: Theme.font
                                         font.pixelSize: Theme.fontSize.body
                                         clip: true
-                                        onVisibleChanged: if (visible) { text = ""; forceActiveFocus(); }
+                                        onVisibleChanged: if (visible) {
+                                            text = "";
+                                            forceActiveFocus();
+                                        }
                                         onAccepted: root.connect(net.modelData, text)
 
                                         Text {
@@ -424,14 +461,18 @@ MouseArea {
             }
         }
 
-        Rectangle { width: parent.width; height: 1; color: Theme.colors.outlineVariant }
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: Theme.colors.outlineVariant
+        }
 
         MenuRow {
             icon: "terminal"
             label: "Open nmtui"
             onClicked: {
                 popup.close();
-                Quickshell.execDetached(["alacritty", "-e", "nmtui"]);
+                Apps.runInTerminal(["nmtui"]);
             }
         }
         MenuRow {

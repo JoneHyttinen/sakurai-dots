@@ -636,7 +636,7 @@ PanelWindow {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     Panels.dockForced = false;
-                    Quickshell.execDetached(["alacritty", "-e", "btop"]);
+                    Apps.runInTerminal(["btop"]);
                 }
 
                 readonly property real value: SystemStats.memPercent

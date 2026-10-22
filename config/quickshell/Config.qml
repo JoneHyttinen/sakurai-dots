@@ -13,6 +13,7 @@ Singleton {
     property alias wallpaper: adapter.wallpaper
     property alias performance: adapter.performance
     property alias hyprland: adapter.hyprland
+    property alias apps: adapter.apps
     // True once this machine's settings file has been read, so nothing
     // acts on the default values while it's still loading
     property bool loaded: false
@@ -108,6 +109,14 @@ Singleton {
                 property string animSpeed: "normal"    // "fast", "normal" or "slow"
                 property string shadowStyle: "shadow"  // "none", "shadow" or "glow"
                 property real glowStrength: 0.6        // 0..1, how opaque the glow is
+            }
+
+            property JsonObject apps: JsonObject {
+                property string terminal: "alacritty"
+                property string browser: ""        // empty = keep what the Hyprland config says
+                property string fileManager: "dolphin"
+                property string editor: "nvim"
+                property string calculator: "gnome-calculator"
             }
         }
     }

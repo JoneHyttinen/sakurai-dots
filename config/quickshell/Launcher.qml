@@ -9,7 +9,12 @@ PanelWindow {
     id: root
     visible: false
     color: "transparent"
-    anchors { top: true; bottom: true; left: true; right: true }
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "qs-launcher"
@@ -24,7 +29,8 @@ PanelWindow {
         path: Quickshell.env("HOME") + "/.local/state/quickshell/launcher-usage.json"
         onAdapterUpdated: writeAdapter()
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound) writeAdapter();
+            if (error === FileViewError.FileNotFound)
+                writeAdapter();
         }
 
         JsonAdapter {
@@ -33,7 +39,9 @@ PanelWindow {
         }
     }
 
-    function uses(app) { return usage.counts[app.id] ?? 0 }
+    function uses(app) {
+        return usage.counts[app.id] ?? 0;
+    }
 
     function recordLaunch(app) {
         // Assign a new object so the change is noticed and saved
@@ -44,9 +52,7 @@ PanelWindow {
 
     // ── Apps and ranking ────────────────────────────────────
 
-    readonly property var apps: DesktopEntries.applications.values
-        .filter(a => !a.noDisplay)
-        .sort((a, b) => a.name.localeCompare(b.name))
+    readonly property var apps: DesktopEntries.applications.values.filter(a => !a.noDisplay).sort((a, b) => a.name.localeCompare(b.name))
 
     // Most used first, then alphabetical
     readonly property var appsByUsage: apps.slice().sort((a, b) => uses(b) - uses(a))
@@ -55,10 +61,14 @@ PanelWindow {
     function score(app, q) {
         const name = app.name.toLowerCase();
         let s = 0;
-        if (name === q) s = 100;
-        else if (name.startsWith(q)) s = 80;
-        else if (name.split(/\s+/).some(w => w.startsWith(q))) s = 60;
-        else if (name.includes(q)) s = 40;
+        if (name === q)
+            s = 100;
+        else if (name.startsWith(q))
+            s = 80;
+        else if (name.split(/\s+/).some(w => w.startsWith(q)))
+            s = 60;
+        else if (name.includes(q))
+            s = 40;
         else {
             const extra = [app.genericName, app.comment, String(app.keywords ?? "")].join(" ").toLowerCase();
             s = extra.includes(q) ? 20 : 0;
@@ -70,8 +80,10 @@ PanelWindow {
 
     // Returns a number for simple math like "2+2" or "2^10", otherwise null
     function calculate(text) {
-        if (!/^[\d\s+\-*/().,%^]+$/.test(text)) return null;  // only digits and operators
-        if (!/\d/.test(text) || !/[+\-*/%^]/.test(text)) return null;
+        if (!/^[\d\s+\-*/().,%^]+$/.test(text))
+            return null;  // only digits and operators
+        if (!/\d/.test(text) || !/[+\-*/%^]/.test(text))
+            return null;
         try {
             const expr = text.replace(/,/g, ".").replace(/\^/g, "**");
             const value = Function("return (" + expr + ")")();
@@ -88,25 +100,37 @@ PanelWindow {
 
         if (raw.startsWith(">")) {
             const cmd = raw.slice(1).trim();
-            return cmd !== "" ? [{ kind: "cmd", cmd: cmd }] : [];
+            return cmd !== "" ? [
+                {
+                    kind: "cmd",
+                    cmd: cmd
+                }
+            ] : [];
         }
 
         const out = [];
         const value = calculate(raw);
-        if (value !== null) out.push({ kind: "calc", value: value });
+        if (value !== null)
+            out.push({
+                kind: "calc",
+                value: value
+            });
 
         const q = raw.toLowerCase();
-        const matched = q === "" ? appsByUsage : apps
-            .map(a => ({ app: a, s: score(a, q) }))
-            .filter(r => r.s > 0)
-            .sort((x, y) => y.s - x.s)
-            .map(r => r.app);
+        const matched = q === "" ? appsByUsage : apps.map(a => ({
+                    app: a,
+                    s: score(a, q)
+                })).filter(r => r.s > 0).sort((x, y) => y.s - x.s).map(r => r.app);
 
-        return out.concat(matched.map(a => ({ kind: "app", app: a })));
+        return out.concat(matched.map(a => ({
+                    kind: "app",
+                    app: a
+                })));
     }
 
     function launch(r, inTerminal) {
-        if (!r) return;
+        if (!r)
+            return;
         close();
         if (r.kind === "app") {
             recordLaunch(r.app);
@@ -115,9 +139,9 @@ PanelWindow {
             Quickshell.execDetached(["wl-copy", String(r.value)]);
         } else if (r.kind === "cmd") {
             if (inTerminal)
-                Quickshell.execDetached(["alacritty", "-e", "sh", "-c", r.cmd + "; exec $SHELL"]);
+                Apps.runInTerminal(["sh", "-c", r.cmd + "; exec $SHELL"]);
             else
-                Quickshell.execDetached(["sh", "-c", r.cmd]);
+                Apps.runInTerminal(["sh", "-c", r.cmd + "; exec $SHELL"]);
         }
     }
 
@@ -132,13 +156,19 @@ PanelWindow {
         search.forceActiveFocus();
         openAnim.restart();
     }
-    function close() { visible = false }
-    function toggle(target) { visible ? close() : open(target) }
+    function close() {
+        visible = false;
+    }
+    function toggle(target) {
+        visible ? close() : open(target);
+    }
 
     // Lets Hyprland open it: qs ipc call launcher toggle
     IpcHandler {
         target: "launcher"
-        function toggle(): void { root.toggle() }
+        function toggle(): void {
+            root.toggle();
+        }
     }
 
     // Dimmed backdrop; clicking it closes the launcher
@@ -165,16 +195,36 @@ PanelWindow {
 
         ParallelAnimation {
             id: openAnim
-            NumberAnimation { target: box; property: "opacity"; from: 0; to: 1; duration: 160 }
-            NumberAnimation { target: box; property: "scale"; from: 0.97; to: 1; duration: 200; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                target: box
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 160
+            }
+            NumberAnimation {
+                target: box
+                property: "scale"
+                from: 0.97
+                to: 1
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
         }
 
         // Swallow clicks so they don't reach the backdrop
-        MouseArea { anchors.fill: parent }
+        MouseArea {
+            anchors.fill: parent
+        }
 
         Column {
             id: col
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                margins: 12
+            }
             spacing: 8
 
             // Search field
@@ -186,7 +236,11 @@ PanelWindow {
 
                 Icon {
                     id: searchIcon
-                    anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
+                    anchors {
+                        left: parent.left
+                        leftMargin: 12
+                        verticalCenter: parent.verticalCenter
+                    }
                     name: root.query.trim().startsWith(">") ? "terminal" : "search"
                     color: Theme.colors.subtext
                 }
@@ -194,8 +248,10 @@ PanelWindow {
                 TextInput {
                     id: search
                     anchors {
-                        left: searchIcon.right; leftMargin: 10
-                        right: parent.right; rightMargin: 12
+                        left: searchIcon.right
+                        leftMargin: 10
+                        right: parent.right
+                        rightMargin: 12
                         verticalCenter: parent.verticalCenter
                     }
                     color: Theme.colors.text
@@ -261,13 +317,8 @@ PanelWindow {
                     readonly property bool current: ListView.isCurrentItem
                     readonly property bool isApp: modelData.kind === "app"
 
-                    readonly property string title: isApp ? modelData.app.name
-                        : modelData.kind === "calc" ? "= " + modelData.value
-                        : modelData.cmd
-                    readonly property string subtitle: isApp
-                        ? (modelData.app.genericName || modelData.app.comment || "")
-                        : modelData.kind === "calc" ? "Enter to copy"
-                        : "Run command  ·  Shift+Enter to run in a terminal"
+                    readonly property string title: isApp ? modelData.app.name : modelData.kind === "calc" ? "= " + modelData.value : modelData.cmd
+                    readonly property string subtitle: isApp ? (modelData.app.genericName || modelData.app.comment || "") : modelData.kind === "calc" ? "Enter to copy" : "Run command  ·  Shift+Enter to run in a terminal"
 
                     width: ListView.view.width
                     height: 48
@@ -281,7 +332,11 @@ PanelWindow {
                     // App icon, or a symbol for calculator/command rows
                     Item {
                         id: iconBox
-                        anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
+                        anchors {
+                            left: parent.left
+                            leftMargin: 10
+                            verticalCenter: parent.verticalCenter
+                        }
                         width: 32
                         height: 32
 
@@ -301,8 +356,10 @@ PanelWindow {
 
                     Column {
                         anchors {
-                            left: iconBox.right; leftMargin: 12
-                            right: parent.right; rightMargin: 10
+                            left: iconBox.right
+                            leftMargin: 12
+                            right: parent.right
+                            rightMargin: 10
                             verticalCenter: parent.verticalCenter
                         }
                         spacing: 1

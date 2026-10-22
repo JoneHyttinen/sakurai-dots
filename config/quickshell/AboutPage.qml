@@ -158,13 +158,13 @@ Column {
             ActionButton {
                 icon: "folder_open"
                 label: "Open dotfiles"
-                onClicked: Quickshell.execDetached(["dolphin", Quickshell.env("HOME") + "/dotfiles"])
+                onClicked: Apps.openFolder(Quickshell.env("HOME") + "/dotfiles")
             }
             ActionButton {
                 icon: "sync"
                 label: "Run dots-sync"
                 // Keeps the terminal open afterwards, so you can read the output
-                onClicked: Quickshell.execDetached(["alacritty", "-e", "fish", "-c", "dots-sync; read -P 'Done. Press Enter to close'"])
+                onClicked: Apps.runInTerminal(["fish", "-c", "dots-sync; read -P 'Done. Press Enter to close'"])
             }
             ActionButton {
                 icon: "refresh"
