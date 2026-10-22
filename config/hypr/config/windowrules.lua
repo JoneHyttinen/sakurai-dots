@@ -128,6 +128,14 @@ hl.window_rule({
 })
 hl.window_rule({ match = { class = "^(Spotify|discord|vesktop)$" }, opacity = "0.98 override 0.88 override" })
 
+-- The shell's own app windows (settings, keybinds): float, centered
+hl.window_rule({
+	name = "quickshell-windows",
+	match = { title = "^(Quickshell Settings|Keybinds)$" },
+	float = true,
+	center = true,
+})
+
 -- Float Utility Windows
 local floatApps = {
 	{ class = "^(kvantummanager|qt[56]ct|nwg-look)$" },

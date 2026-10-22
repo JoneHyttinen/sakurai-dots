@@ -46,7 +46,7 @@
         "blurSize": 8,
         "borderSize": 2,
         "gapsIn": 4,
-        "gapsOut": 6,
+        "gapsOut": 10,
         "glowStrength": 0.5,
         "inactiveOpacity": 0.85,
         "matchFrame": true,

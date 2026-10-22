@@ -17,6 +17,7 @@ ShellRoot {
     SettingsWindow {
         picker: appWallpaperPicker
     }
+    KeybindsWindow {}
 
     IpcHandler {
         target: "dock"
