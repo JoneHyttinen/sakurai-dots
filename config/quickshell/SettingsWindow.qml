@@ -185,10 +185,11 @@ FloatingWindow {
                     picker: win.picker
                     targetScreen: win.screen
                 }
+                HyprlandSettingsPage {}
 
                 // Placeholders until those tabs are built
                 Repeater {
-                    model: win.pages.length - 5
+                    model: win.pages.length - 6
                     delegate: Item {
                         implicitHeight: 120
                         Text {

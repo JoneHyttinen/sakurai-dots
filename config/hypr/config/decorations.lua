@@ -13,7 +13,7 @@ hl.config({
 		rounding = 12, -- matches Theme.radius in Quickshell
 		rounding_power = 2,
 		dim_special = 0.3,
-		active_opacity = 0.85,
+		active_opacity = 0.9,
 		inactive_opacity = 0.8,
 		fullscreen_opacity = 1,
 
@@ -27,7 +27,7 @@ hl.config({
 		blur = {
 			size = 6,
 			passes = 1,
-			noise = 0.03,
+			noise = 0.08,
 			vibrancy = 0.2,
 			special = true,
 		},

@@ -29,7 +29,8 @@ PanelWindow {
             "steam": "svg",
             "spotify": "svg",
             "discord": "svg",
-            "vesktop": "svg"
+            "vesktop": "svg",
+            "code": "svg"
         })
 
     // Set from shell.qml; the dock's "all apps" button opens it

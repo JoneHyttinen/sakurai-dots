@@ -7,6 +7,7 @@ ShellRoot {
         id: appLauncher
     }
     SettingsWindow {}
+    HyprSettingsWriter {}
     ClipboardPicker {}
     WallpaperPicker {
         id: appWallpaperPicker

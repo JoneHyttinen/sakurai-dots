@@ -28,11 +28,33 @@
         "showRunning": true,
         "themedTiles": true
     },
+    "hyprland": {
+        "activeOpacity": 0.92,
+        "animSpeed": "normal",
+        "animations": true,
+        "blur": true,
+        "blurPasses": 1,
+        "blurSize": 8,
+        "borderSize": 2,
+        "gapsIn": 4,
+        "gapsOut": 10,
+        "inactiveOpacity": 0.85,
+        "matchFrame": true,
+        "rounding": 12,
+        "shadow": true,
+        "shadowRange": 28
+    },
     "notifications": {
         "keepCritical": true,
         "maxPopups": 4,
         "screen": "primary",
         "timeout": 5
+    },
+    "performance": {
+        "mediaBlur": true,
+        "statsInterval": 1000,
+        "visualizer": true,
+        "windowPreviews": true
     },
     "wallpaper": {
         "folder": "",

@@ -31,6 +31,15 @@ require("config.misc")
 require("config.windowrules")
 require("config.workspaces")
 require("config.plugins")
+-- Settings from the Quickshell settings window (per machine, outside the repo)
+do
+	local path = os.getenv("HOME") .. "/.local/state/hypr/settings.lua"
+	local f = io.open(path)
+	if f then
+		f:close()
+		dofile(path)
+	end
+end
 pcall(require, "config.matugen")
 
 if host == "elitebook" then
