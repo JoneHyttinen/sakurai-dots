@@ -117,7 +117,7 @@ hl.window_rule({
 
 hl.window_rule({
 	match = {
-		class = "^(firefox|zen|firefox-developer-edition|org.wireshark.Wireshark|code|teams-for-linux|chromium)$",
+		class = "^(firefox|zen|firefox-developer-edition|org.wireshark.Wireshark|code|teams-for-linux|chromium|com.obsproject.Studio)$",
 	},
 	opacity = "1.0 override",
 })
@@ -135,6 +135,8 @@ hl.window_rule({
 	float = true,
 	center = true,
 })
+
+hl.window_rule({ match = { class = "^(Emulator)$" }, float = true, center = true, opacity = "1.0 override" })
 
 -- Float Utility Windows
 local floatApps = {

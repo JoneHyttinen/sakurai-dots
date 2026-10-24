@@ -38,7 +38,7 @@
         "themedTiles": true
     },
     "hyprland": {
-        "activeOpacity": 0.92,
+        "activeOpacity": 0.9,
         "animSpeed": "normal",
         "animations": true,
         "blur": true,
@@ -48,9 +48,9 @@
         "gapsIn": 4,
         "gapsOut": 10,
         "glowStrength": 0.5,
-        "inactiveOpacity": 0.85,
-        "matchFrame": true,
-        "rounding": 12,
+        "inactiveOpacity": 0.81,
+        "matchFrame": false,
+        "rounding": 15,
         "shadow": true,
         "shadowRange": 12,
         "shadowStyle": "glow"
