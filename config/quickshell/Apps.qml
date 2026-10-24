@@ -29,4 +29,22 @@ Singleton {
     function openFolder(path) {
         Quickshell.execDetached([fileManager, path]);
     }
+
+    // Terminal editors (nvim, vim, ...) need a terminal; GUI ones open directly.
+    // Uses the editor's desktop entry when there is one, else a list of known ones.
+    readonly property bool editorInTerminal: {
+        const name = editor.split(/\s+/)[0].split("/").pop();
+        const entry = DesktopEntries.applications.values.find(e => (e.command?.[0] ?? "").split("/").pop() === name);
+        if (entry)
+            return entry.runInTerminal;
+        return ["nvim", "vim", "vi", "nano", "hx", "helix", "micro", "kak"].includes(name);
+    }
+
+    function openFile(path) {
+        const args = editor.split(/\s+/).concat([path]);
+        if (editorInTerminal)
+            runInTerminal(args);
+        else
+            Quickshell.execDetached(args);
+    }
 }

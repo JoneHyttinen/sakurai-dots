@@ -44,6 +44,10 @@ FloatingWindow {
             label: "Default apps"
         },
         {
+            icon: "settings",
+            label: "Config"
+        },
+        {
             icon: "info",
             label: "About"
         },
@@ -191,8 +195,9 @@ FloatingWindow {
                 }
                 HyprlandSettingsPage {}
                 AppsSettingsPage {}
+                ConfigPage {}
                 AboutPage {
-                    active: win.visible && win.page === 7
+                    active: win.visible && win.page === 8
                 }
             }
         }
