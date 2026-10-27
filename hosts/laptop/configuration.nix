@@ -63,47 +63,50 @@
   users.users."sakurai" = {
     isNormalUser = true;
     description = "Jone";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "wireshark" ];
     packages = with pkgs; [];
   };
 
   # fish as the login shell; Alacritty and the TTYs start it automatically
   programs.fish.enable = true;
-  users.users.sakurai.shell = pkgs.fish;
+users.users.sakurai.shell = pkgs.fish;
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+# Allow unfree packages
+nixpkgs.config.allowUnfree = true;
 
-  # Enable the newer nix CLI and flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+# Enable the newer nix CLI and flakes
+nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Brightness: let your user change the backlight without sudo
-  services.udev.packages = [ pkgs.brightnessctl ];
+# Brightness: let your user change the backlight without sudo
+services.udev.packages = [ pkgs.brightnessctl ];
 
-  # Power profiles (Saver / Balanced / Performance)
-  services.power-profiles-daemon.enable = true;
+# Power profiles (Saver / Balanced / Performance)
+services.power-profiles-daemon.enable = true;
 
-  # Qt theming
-  qt = {
-      enable = true;
-      platformTheme = "qt5ct";
+# Qt theming
+qt = {
+    enable = true;
+    platformTheme = "qt5ct";
+};
+
+# Hyprland with UWSM
+programs.hyprland = {
+    enable = true;
+    withUWSM = true;
+};
+
+programs.hyprlock.enable = true;
+
+programs.nix-ld.enable = true;
+
+programs.dconf.enable = true;
+
+programs.solaar.enable = true;
+
+programs.wireshark = {
+    enable = true;
+    package = pkgs.wireshark;
   };
-
-  # Hyprland with UWSM
-  programs.hyprland = {
-     enable = true;
-     withUWSM = true;
-  };
-
-  programs.hyprlock.enable = true;
-
-  programs.nix-ld.enable = true;
-
-  programs.dconf.enable = true;
-
-  programs.solaar.enable = true;
-
-  programs.wireshark.enable = true;
 
   # Bluetooth GUI
   services.blueman.enable = true;
