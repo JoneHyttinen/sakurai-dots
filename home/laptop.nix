@@ -3,7 +3,7 @@ let
   quickshell = pkgs.symlinkJoin {
     name = "quickshell";
     paths = [ pkgs.quickshell ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
+    nativeBuildInputs = [ pkgs.makeWrapper pkgs.libtool pkgs.libusb1 ];
     postBuild = ''
       for bin in quickshell qs; do
         if [ -e $out/bin/$bin ]; then
@@ -29,6 +29,8 @@ in
       kdePackages.breeze-icons
       adw-gtk3
       dconf
+
+      pipx
 
       # fish: the same prompt and plugins as on CachyOS
       fishPlugins.pure       # the ❯ prompt with git status and command time
@@ -109,6 +111,10 @@ in
       ffuf
       seclists
       wireshark
+      atool
+      wget
+      openssl
+      urh
   ];
 
   fonts.fontconfig.enable = true;

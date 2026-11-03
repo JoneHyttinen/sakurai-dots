@@ -140,6 +140,7 @@ programs.wireshark = {
      wget
      firefox
      adwaita-icon-theme
+     rtl_433
   ];
 
   environment.sessionVariables.SECLISTS = "${pkgs.seclists}/share/wordlists/seclists";
