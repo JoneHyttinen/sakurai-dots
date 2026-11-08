@@ -19,6 +19,12 @@ hl.bind(mainMod .. " + Up", hl.dsp.focus({ direction = "up" }), { description = 
 hl.bind(mainMod .. " + Down", hl.dsp.focus({ direction = "down" }), { description = "Focus Window Down" })
 hl.bind("ALT + Tab", hl.dsp.window.cycle_next(), { description = "Cycle Windows" })
 
+-- App switcher (Quickshell): hold SUPER, tap Tab / SHIFT + Tab, let go to switch
+hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("qs ipc call switcher next"), { repeating = true, description = "Window Switcher" })
+hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.exec_cmd("qs ipc call switcher prev"), { repeating = true, description = "Window Switcher (Back)" })
+-- Backup for picking the window on SUPER release (the switcher also watches for it)
+hl.bind(mainMod .. " + Super_L", hl.dsp.exec_cmd("qs ipc call switcher commit"), { release = true, non_consuming = true, description = "Window Switcher (Select)" })
+
 -- Move active window around workspaces & monitors
 hl.bind(mainMod .. " + SHIFT + Up", hl.dsp.window.move({ direction = "u" }), { description = "Move Window Up" })
 hl.bind(mainMod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "r" }), { description = "Move Window Right" })

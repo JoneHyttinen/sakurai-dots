@@ -18,6 +18,7 @@ ShellRoot {
         picker: appWallpaperPicker
     }
     KeybindsWindow {}
+    WindowSwitcher {}
 
     IpcHandler {
         target: "dock"
