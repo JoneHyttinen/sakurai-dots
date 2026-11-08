@@ -6,7 +6,7 @@
         "frameSide": 8,
         "frameTop": 45,
         "panelBlur": true,
-        "panelOpacity": 0.85,
+        "panelOpacity": 0.8,
         "radius": 12
     },
     "apps": {
@@ -38,7 +38,7 @@
         "themedTiles": true
     },
     "hyprland": {
-        "activeOpacity": 0.9,
+        "activeOpacity": 0.92,
         "animSpeed": "normal",
         "animations": true,
         "blur": true,
@@ -48,7 +48,7 @@
         "gapsIn": 4,
         "gapsOut": 10,
         "glowStrength": 0.5,
-        "inactiveOpacity": 0.81,
+        "inactiveOpacity": 0.82,
         "matchFrame": false,
         "rounding": 15,
         "shadow": true,
@@ -57,13 +57,13 @@
     },
     "notifications": {
         "keepCritical": true,
-        "maxPopups": 4,
+        "maxPopups": 3,
         "screen": "primary",
         "timeout": 5
     },
     "performance": {
         "mediaBlur": true,
-        "statsInterval": 1000,
+        "statsInterval": 2000,
         "visualizer": true,
         "windowPreviews": true
     },
@@ -71,7 +71,7 @@
         "folder": "",
         "monoThreshold": 0.08,
         "scheme": "auto",
-        "transition": "fade",
-        "transitionDuration": 1.5
+        "transition": "grow",
+        "transitionDuration": 1.2
     }
 }

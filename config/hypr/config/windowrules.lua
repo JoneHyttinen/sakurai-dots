@@ -1,7 +1,13 @@
 -- Window rules wiki https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 
 -- Generic floating position
-hl.window_rule({ match = { float = true }, center = true, persistent_size = true })
+-- (FL Studio is excluded: centering breaks its popups and tool windows)
+local flStudio = "^(fl64\\.exe)$"
+hl.window_rule({
+	match = { float = true, class = "negative:" .. flStudio },
+	center = true,
+	persistent_size = true,
+})
 
 -- Picture-in-Picture
 hl.window_rule({
@@ -58,7 +64,7 @@ hl.window_rule({
 
 -- Apps
 hl.window_rule({
-	match = { class = "^(.*\\.exe)$", float = true },
+	match = { class = "^(.*\\.exe)$", initial_class = "negative:" .. flStudio, float = true },
 	monitor = PRIMARY_MONITOR,
 	center = true,
 	fullscreen_state = 0,
@@ -117,7 +123,7 @@ hl.window_rule({
 
 hl.window_rule({
 	match = {
-		class = "^(firefox|zen|firefox-developer-edition|org.wireshark.Wireshark|code|teams-for-linux|chromium|com.obsproject.Studio)$",
+		class = "^(firefox|zen|firefox-developer-edition|org.wireshark.Wireshark|code|teams-for-linux|chromium|com.obsproject.Studio|VirtualBox Machine)$",
 	},
 	opacity = "1.0 override",
 })
@@ -137,6 +143,7 @@ hl.window_rule({
 })
 
 hl.window_rule({ match = { class = "^(Emulator)$" }, float = true, center = true, opacity = "1.0 override" })
+hl.window_rule({ match = { title = "^(DaVinci Resolve - demo_email)$" }, opacity = "1.0 override" })
 
 -- Float Utility Windows
 local floatApps = {
@@ -170,6 +177,18 @@ hl.window_rule({
 	match = { class = ".*" },
 	suppress_event = "maximize",
 })
+
+-- FL Studio (Wine). Must come after suppress-maximize-events so it wins.
+-- Tile the main window so its floating tool windows always stay above it.
+hl.window_rule({
+	match = { class = flStudio, initial_title = "^(FL Studio.*)$" },
+	float = false,
+	opacity = "1.0 override",
+})
+-- Don't jump workspaces or steal focus when Wine re-activates a window
+hl.window_rule({ match = { class = flStudio }, suppress_event = "maximize activate activatefocus" })
+-- Untitled helper windows (drag icons etc.) must not take focus, or drag & drop breaks
+hl.window_rule({ match = { class = flStudio, title = "^$" }, no_focus = true })
 
 -- Fix some dragging issues with XWayland
 hl.window_rule({
