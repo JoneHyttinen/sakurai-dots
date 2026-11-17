@@ -7,9 +7,10 @@ require("config.decorations")
 require("config.variables")
 
 -- Machine-specific settings: config/hosts/<hostname>.lua (or hosts/default.lua)
+local host
 do
 	local f = io.open("/etc/hostname")
-	local host = f and f:read("*l") or "default"
+	host = f and f:read("*l") or "default"
 	if f then
 		f:close()
 	end

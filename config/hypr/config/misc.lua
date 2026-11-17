@@ -13,12 +13,12 @@ hl.config({
 		middle_click_paste = false,
 		enable_swallow = true,
 		swallow_regex = "(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)",
-		vrr = 3,
+		vrr = 0, -- VRR off: neither monitor supports it, and it upsets NVIDIA at startup
 		focus_on_activate = true,
 		allow_session_lock_restore = true,
 	},
 	render = {
-		direct_scanout = 2,
+		direct_scanout = 0, -- off: causes flip timeouts on NVIDIA
 	},
 	xwayland = {
 		force_zero_scaling = true,
