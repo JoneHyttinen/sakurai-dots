@@ -23,6 +23,7 @@ Item {
     }
 
     implicitHeight: content.implicitHeight
+    onVisibleChanged: if (visible) Brightness.refresh()
 
     PwObjectTracker { objects: [page.sink, page.source] }
     SystemClock { id: clock; precision: SystemClock.Minutes }
@@ -185,35 +186,55 @@ Item {
                             }
                         }
                     }
-                    // Screen brightness (laptops)
-                    Row {
-                        visible: Brightness.available
-                        width: sliders.width
-                        spacing: 10
+                    // Screen brightness: laptop backlight and DDC/CI monitors
+                    Repeater {
+                        model: Brightness.outputs
+                        delegate: Row {
+                            id: brightRow
+                            required property var modelData
+                            width: sliders.width
+                            spacing: 10
 
-                        Icon {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 24
-                            horizontalAlignment: Text.AlignHCenter
-                            name: "brightness_medium"
-                            color: Theme.colors.subtext
-                        }
-                        SliderBar {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 78
-                            value: Brightness.percent
-                            onMoved: v => Brightness.set(v)
-                        }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 34
-                            horizontalAlignment: Text.AlignRight
-                            text: Math.round(Brightness.percent * 100) + "%"
-                            color: Theme.colors.text
-                            font.family: Theme.font
-                            font.pixelSize: Theme.fontSize.small
+                            Icon {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 24
+                                horizontalAlignment: Text.AlignHCenter
+                                name: "brightness_medium"
+                                color: Theme.colors.subtext
+                            }
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - 78
+                                spacing: 2
+
+                                // Name the display when there's more than one
+                                Text {
+                                    visible: Brightness.outputs.length > 1
+                                    text: brightRow.modelData.label
+                                    color: Theme.colors.subtext
+                                    font.family: Theme.font
+                                    font.pixelSize: Theme.fontSize.tiny
+                                }
+                                SliderBar {
+                                    width: parent.width
+                                    value: brightRow.modelData.percent
+                                    onMoved: v => brightRow.modelData.set(v)
+                                }
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 34
+                                horizontalAlignment: Text.AlignRight
+                                text: Math.round(brightRow.modelData.percent * 100) + "%"
+                                color: Theme.colors.text
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontSize.small
+                            }
                         }
                     }
+                }
+            }
+
             // Power profiles (laptop)
             Rectangle {
                 visible: Host.laptop
@@ -273,8 +294,6 @@ Item {
                             }
                         }
                     }
-                }
-            }
                 }
             }
         }

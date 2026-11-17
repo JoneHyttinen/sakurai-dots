@@ -123,7 +123,7 @@ hl.window_rule({
 
 hl.window_rule({
 	match = {
-		class = "^(firefox|zen|firefox-developer-edition|org.wireshark.Wireshark|code|teams-for-linux|chromium|com.obsproject.Studio|VirtualBox Machine)$",
+		class = "^(firefox|zen|firefox-developer-edition|org.wireshark.Wireshark|code|teams-for-linux|chromium|com.obsproject.Studio|VirtualBox Machine|urh)$",
 	},
 	opacity = "1.0 override",
 })

@@ -21,6 +21,7 @@ return {
         "vim",
         "yaml",
         "qmljs",
+        "robotcode",
       },
     },
   },
